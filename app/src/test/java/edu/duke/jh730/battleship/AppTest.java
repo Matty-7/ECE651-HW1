@@ -78,12 +78,25 @@ public class AppTest {
   void test_main() throws IOException {
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(bytes, true);
-
+    
     String inputString = "B2V\n";
     InputStream input = new ByteArrayInputStream(inputString.getBytes());
     assertNotNull(input);
-
-    String expectedString = 
+    
+    InputStream oldIn = System.in;
+    PrintStream oldOut = System.out;
+    
+    try {
+        System.setIn(input);
+        System.setOut(out);
+        App.main(new String[0]);
+    }
+    finally {
+        System.setIn(oldIn);
+        System.setOut(oldOut);
+    }
+    
+    String expected = 
       "Where would you like to put your ship?\n" +
       "  0|1|2|3|4|5|6|7|8|9\n" +
       "A  | | | | | | | | |  A\n" +
@@ -107,20 +120,6 @@ public class AppTest {
       "S  | | | | | | | | |  S\n" +
       "T  | | | | | | | | |  T\n" +
       "  0|1|2|3|4|5|6|7|8|9\n";
-
-    InputStream oldIn = System.in;
-    PrintStream oldOut = System.out;
-
-    try {
-      System.setIn(input);
-      System.setOut(out);
-      App.main(new String[0]);
-    }
-    finally {
-      System.setIn(oldIn);
-      System.setOut(oldOut);
-    }
-
-    assertEquals(expectedString, bytes.toString());
+    assertEquals(expected, bytes.toString());
   }
 }
