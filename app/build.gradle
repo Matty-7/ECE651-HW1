@@ -9,7 +9,6 @@ plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'java'
     id 'application'
-    id 'com.bmuschko.clover' version '3.0.3'
 }
 
 repositories {
@@ -22,9 +21,6 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    // This dependency is used by the application.
-    implementation libs.guava
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -39,8 +35,7 @@ application {
     mainClass = 'edu.duke.jh730.battleship.App'
 }
 
-tasks.named('test') {
-    // Use JUnit Platform for unit tests.
+test {
     useJUnitPlatform()
     testLogging {
         showStandardStreams = true
@@ -48,6 +43,6 @@ tasks.named('test') {
     }
 }
 
-clover {
-    debug = true
+run {
+    standardInput = System.in
 }
