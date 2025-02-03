@@ -6,28 +6,25 @@ package edu.duke.jh730.battleship;
  * enemy's board.
  */
 public class BoardTextView {
-  private final Board toDisplay;
+  private final Board<Character> toDisplay;
 
   /**
-   * Constructs a BoardView, given the board it will display.
    * @param toDisplay is the Board to display
-   * @throws IllegalArgumentException if the board is larger than 10x26.
+   * @throws IllegalArgumentException if the board is too large to display
    */
-  public BoardTextView(Board toDisplay) {
+  public BoardTextView(Board<Character> toDisplay) {
     this.toDisplay = toDisplay;
     if (toDisplay.getWidth() > 10 || toDisplay.getHeight() > 26) {
-      throw new IllegalArgumentException(
-          "Board must be no larger than 10x26, but is " + toDisplay.getWidth() + "x" + toDisplay.getHeight());
+      throw new IllegalArgumentException("Board must be no larger than 10x26, but is " + toDisplay.getWidth() + "x" + toDisplay.getHeight());
     }
   }
 
   /**
-   * This makes the header line,
    * @return the String that is the header line for the given board
    */
   String makeHeader() {
     StringBuilder ans = new StringBuilder("  ");
-    String sep = ""; //start with nothing to separate, then switch to | to separate
+    String sep = "";
     for (int i = 0; i < toDisplay.getWidth(); i++) {
       ans.append(sep);
       ans.append(i);
@@ -38,27 +35,32 @@ public class BoardTextView {
   }
 
   /**
-   * This displays the board for the player (own board).
-   * @return the String representation of the board.
+   * This displays the board
    */
   public String displayMyOwnBoard() {
-    String header = makeHeader();
-    StringBuilder body = new StringBuilder();
+    StringBuilder ans = new StringBuilder();
+    ans.append(makeHeader());
+    
     for (int row = 0; row < toDisplay.getHeight(); row++) {
-      body.append((char)('A' + row));
+      String sep = "";
+      ans.append((char)('A' + row));
+      ans.append(" ");
       for (int col = 0; col < toDisplay.getWidth(); col++) {
-        if (col == 0) {
-          body.append(" ");
+        ans.append(sep);
+        Character c = toDisplay.whatIsAt(new Coordinate(row, col));
+        if (c == null) {
+          ans.append(" ");
+        } else {
+          ans.append(c);
         }
-        body.append(" ");
-        if (col < toDisplay.getWidth() - 1) {
-          body.append("|");
-        }
+        sep = "|";
       }
-      body.append(" ");
-      body.append((char)('A' + row));
-      body.append("\n");
+      ans.append(" ");
+      ans.append((char)('A' + row));
+      ans.append("\n");
     }
-    return header + body.toString() + header;
+    
+    ans.append(makeHeader());
+    return ans.toString();
   }
 } 
