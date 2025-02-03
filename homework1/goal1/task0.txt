@@ -1,0 +1,36 @@
+
+Goal 1: Minimal end to end system
+---------------------------------
+//Task 0. Project Setup
+  You should already have your development environment setup from the previous tutorial.
+  We need to make a new gitlab project and create the build.gradle.
+  Go to Duke's gitlab, create a new project named
+    ece651-sp25-YOURNETID-battleship
+  [replace YOURNETID with your netid]
+  Now clone that project to your computer.
+  cd into that directory (cd ece651-sp25-YOURNETID-battleship)
+  and do
+  
+  gradle init --package edu.duke.YOURNETID.battleship
+
+  (replace YOURNETID with your netid)
+  Note: previous versions of Gradle prompted for the package, and the development
+  environment setup wasn't updated for this change.   You need to specify --package
+  and the name of the package to give a default package
+
+The rest of the Gradle setup is as in the development environment setup:
+  - Edit gradle.properties to turn off the configuration cache
+    (we did't have this in the writeup this year, but will add in the future)
+  - Update your build.gradle to have clover, test logging (show standard streams
+  and full exception format), and clover debug info
+
+Before you proceed, run
+
+./gradlew  dependencies
+
+We aren't so much interested in the output, but it will make sure your build.gradle file
+is valid, and check the dependency structure.  This mostly will help you identify any problems
+before you proceed.
+
+
+Hooary! You've done task 0 :)
