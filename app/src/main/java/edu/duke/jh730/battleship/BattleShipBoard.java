@@ -1,15 +1,16 @@
 package edu.duke.jh730.battleship;
 
+import java.util.ArrayList;
 
-public class BattleShipBoard implements Board {
+public class BattleShipBoard<T> implements Board<T> {
   private final int width;
   private final int height;
+  private final ArrayList<Ship<T>> myShips;
 
   /**
-   * Constructs a BattleShipBoard with the specified width and height
-   * @param w is the width 
-   * @param h is the height
-   * @throws IllegalArgumentException if the width or height are less than or equal to zero.
+   * @param w is the width of the board
+   * @param h is the height of the board
+   * @throws IllegalArgumentException if the width or height are less than or equal to 0
    */
   public BattleShipBoard(int w, int h) {
     if (w <= 0) {
@@ -20,6 +21,7 @@ public class BattleShipBoard implements Board {
     }
     this.width = w;
     this.height = h;
+    this.myShips = new ArrayList<Ship<T>>();
   }
 
   public int getWidth() {
@@ -28,5 +30,19 @@ public class BattleShipBoard implements Board {
 
   public int getHeight() {
     return height;
+  }
+
+  public boolean tryAddShip(Ship<T> toAdd) {
+    myShips.add(toAdd);
+    return true;
+  }
+
+  public T whatIsAt(Coordinate where) {
+    for (Ship<T> s: myShips) {
+      if (s.occupiesCoordinates(where)) {
+        return s.getDisplayInfoAt(where);
+      }
+    }
+    return null;
   }
 } 

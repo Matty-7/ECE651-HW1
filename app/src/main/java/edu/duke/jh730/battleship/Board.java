@@ -1,6 +1,18 @@
 package edu.duke.jh730.battleship;
 
-public interface Board {
+public interface Board<T> {
   public int getWidth();
   public int getHeight();
+  
+  /**
+   * @param toAdd is the ship to add
+   * @return true if the ship was successfully added, false otherwise
+   */
+  public boolean tryAddShip(Ship<T> toAdd);
+
+  /**
+   * @param where is the coordinate to check
+   * @return what is at that coordinate
+   */
+  public T whatIsAt(Coordinate where);
 } 
