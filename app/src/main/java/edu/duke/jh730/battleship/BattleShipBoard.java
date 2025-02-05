@@ -8,6 +8,7 @@ public class BattleShipBoard<T> implements Board<T> {
   private final ArrayList<Ship<T>> myShips;
 
   /**
+   * Constructor for BattleShipBoard
    * @param w is the width of the board
    * @param h is the height of the board
    * @throws IllegalArgumentException if the width or height are less than or equal to 0

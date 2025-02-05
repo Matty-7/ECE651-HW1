@@ -50,9 +50,9 @@ public class AppTest {
       "Where would you like to put your ship?\n" +
       "  0|1|2|3|4|5|6|7|8|9\n" +
       "A  | | | | | | | | |  A\n" +
-      "B  | |s| | | | | | |  B\n" +
-      "C  | | | | | | | | |  C\n" +
-      "D  | | | | | | | | |  D\n" +
+      "B  | |d| | | | | | |  B\n" +
+      "C  | |d| | | | | | |  C\n" +
+      "D  | |d| | | | | | |  D\n" +
       "E  | | | | | | | | |  E\n" +
       "F  | | | | | | | | |  F\n" +
       "G  | | | | | | | | |  G\n" +
@@ -100,9 +100,9 @@ public class AppTest {
       "Where would you like to put your ship?\n" +
       "  0|1|2|3|4|5|6|7|8|9\n" +
       "A  | | | | | | | | |  A\n" +
-      "B  | |s| | | | | | |  B\n" +
-      "C  | | | | | | | | |  C\n" +
-      "D  | | | | | | | | |  D\n" +
+      "B  | |d| | | | | | |  B\n" +
+      "C  | |d| | | | | | |  C\n" +
+      "D  | |d| | | | | | |  D\n" +
       "E  | | | | | | | | |  E\n" +
       "F  | | | | | | | | |  F\n" +
       "G  | | | | | | | | |  G\n" +

@@ -9,6 +9,7 @@ public class BoardTextView {
   private final Board<Character> toDisplay;
 
   /**
+   * Constructor for BoardTextView
    * @param toDisplay is the Board to display
    * @throws IllegalArgumentException if the board is too large to display
    */
@@ -20,6 +21,7 @@ public class BoardTextView {
   }
 
   /**
+   * Make the header line for the given board
    * @return the String that is the header line for the given board
    */
   String makeHeader() {
@@ -36,6 +38,7 @@ public class BoardTextView {
 
   /**
    * This displays the board
+   * @return the String that is the board
    */
   public String displayMyOwnBoard() {
     StringBuilder ans = new StringBuilder();
