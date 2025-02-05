@@ -22,6 +22,16 @@ public class BasicShipTest {
     assertFalse(s1.isSunk());
     assertFalse(s1.wasHitAt(c1));
     s1.recordHitAt(c1);
-    assertFalse(s1.wasHitAt(c1));
+    assertTrue(s1.wasHitAt(c1));
+    assertTrue(s1.isSunk());
   }
-} 
+
+  @Test
+  public void test_invalid_coordinate() {
+    Coordinate c1 = new Coordinate(1, 2);
+    Coordinate c2 = new Coordinate(0, 0);
+    Ship<Character> s1 = new RectangleShip<Character>(c1, 's', '*');
+    assertThrows(IllegalArgumentException.class, () -> s1.recordHitAt(c2));
+    assertThrows(IllegalArgumentException.class, () -> s1.wasHitAt(c2));
+  }
+}
