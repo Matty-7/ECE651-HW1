@@ -33,7 +33,7 @@ public class BoardTextViewTest {
     Board<Character> b1 = new BattleShipBoard<Character>(4, 3);
     BoardTextView view = new BoardTextView(b1);
     
-    Ship<Character> s1 = new BasicShip(new Coordinate(0, 0));
+    Ship<Character> s1 = new RectangleShip<Character>(new Coordinate(0, 0), 's', '*');
     b1.tryAddShip(s1);
     String expectedHeader = "  0|1|2|3\n";
     String expectedBody = 
@@ -42,7 +42,7 @@ public class BoardTextViewTest {
       "C  | | |  C\n";
     assertEquals(expectedHeader + expectedBody + expectedHeader, view.displayMyOwnBoard());
 
-    Ship<Character> s2 = new BasicShip(new Coordinate(1, 2));
+    Ship<Character> s2 = new RectangleShip<Character>(new Coordinate(1, 2), 's', '*');
     b1.tryAddShip(s2);
     expectedBody = 
       "A s| | |  A\n" +

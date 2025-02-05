@@ -40,7 +40,7 @@ public class BattleShipBoardTest {
     BattleShipBoard<Character> b = new BattleShipBoard<Character>(2, 2);
     Character[][] expected = new Character[2][2];
     Coordinate c1 = new Coordinate(1, 0);
-    Ship<Character> s1 = new BasicShip(c1);
+    Ship<Character> s1 = new RectangleShip<Character>(c1, 's', '*');
     assertTrue(b.tryAddShip(s1));
     expected[1][0] = 's';
     checkWhatIsAtBoard(b, expected);
