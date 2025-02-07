@@ -44,5 +44,15 @@ public class BattleShipBoardTest {
     assertTrue(b.tryAddShip(s1));
     expected[1][0] = 's';
     checkWhatIsAtBoard(b, expected);
+
+    // Try to add ship that collides
+    Ship<Character> s2 = new RectangleShip<Character>(c1, 'd', '*');
+    assertFalse(b.tryAddShip(s2));
+    checkWhatIsAtBoard(b, expected);
+
+    // Try to add ship out of bounds
+    Ship<Character> s3 = new RectangleShip<Character>(new Coordinate(-1, 0), 'b', '*');
+    assertFalse(b.tryAddShip(s3));
+    checkWhatIsAtBoard(b, expected);
   }
 } 
