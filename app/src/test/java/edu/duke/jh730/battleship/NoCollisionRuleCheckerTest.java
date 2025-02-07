@@ -19,15 +19,15 @@ public class NoCollisionRuleCheckerTest {
     Ship<Character> s2 = f.makeSubmarine(new Placement("A0H"));
     assertFalse(checker.checkPlacement(s2, b));
 
-    // Test valid placement without collision (moved to a non-colliding position)
-    Ship<Character> s3 = f.makeSubmarine(new Placement("C0V"));
+    // Test valid placement without collision
+    Ship<Character> s3 = f.makeSubmarine(new Placement("A2V"));
     assertTrue(checker.checkPlacement(s3, b));
   }
 
   @Test
   public void test_rule_chain() {
-    NoCollisionRuleChecker<Character> noCollision = new NoCollisionRuleChecker<>(null);
-    PlacementRuleChecker<Character> checker = new InBoundsRuleChecker<>(noCollision);
+    PlacementRuleChecker<Character> inBounds = new InBoundsRuleChecker<>(null);
+    PlacementRuleChecker<Character> checker = new NoCollisionRuleChecker<>(inBounds);
     Board<Character> b = new BattleShipBoard<Character>(10, 20, checker);
     V1ShipFactory f = new V1ShipFactory();
     
@@ -40,7 +40,7 @@ public class NoCollisionRuleCheckerTest {
     Ship<Character> s2 = f.makeSubmarine(new Placement("A0H"));
     assertFalse(checker.checkPlacement(s2, b));
 
-    // Test out of bounds (should fail at first checker)
+    // Test out of bounds (should fail at second checker)
     Ship<Character> s3 = f.makeSubmarine(new Placement("Z0V"));
     assertFalse(checker.checkPlacement(s3, b));
   }
