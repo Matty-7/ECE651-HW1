@@ -44,4 +44,10 @@ public interface Ship<T> {
    * @return The view-specific information at that coordinate.
    */
   public T getDisplayInfoAt(Coordinate where);
+
+  /**
+   * Get all of the Coordinates that this Ship occupies.
+   * @return An Iterable with the coordinates that this Ship occupies
+   */
+  public Iterable<Coordinate> getCoordinates();
 } 
