@@ -3,123 +3,76 @@ package edu.duke.jh730.battleship;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
-import java.io.ByteArrayInputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.api.parallel.Resources;
 
 public class AppTest {
-  @Test
-  void test_read_placement() throws IOException {
-    StringReader sr = new StringReader("B2V\nC8H\na4v\n");
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    PrintStream ps = new PrintStream(bytes, true);
-    Board<Character> b = new BattleShipBoard<Character>(10, 20);
-    App app = new App(b, sr, ps);
-
-    String prompt = "Please enter a location for a ship:";
-    Placement[] expected = new Placement[3];
-    expected[0] = new Placement(new Coordinate(1, 2), 'V');
-    expected[1] = new Placement(new Coordinate(2, 8), 'H');
-    expected[2] = new Placement(new Coordinate(0, 4), 'V');
-
-    for (int i = 0; i < expected.length; i++) {
-      Placement p = app.readPlacement(prompt);
-      assertEquals(expected[i], p);
-      assertEquals(prompt + "\n", bytes.toString());
-      bytes.reset();
-    }
+  private TextPlayer createTextPlayer(String name, String inputData, ByteArrayOutputStream bytes) {
+    BufferedReader input = new BufferedReader(new StringReader(inputData));
+    PrintStream output = new PrintStream(bytes, true);
+    Board<Character> board = new BattleShipBoard<Character>(10, 20);
+    V1ShipFactory shipFactory = new V1ShipFactory();
+    return new TextPlayer(name, board, input, output, shipFactory);
   }
 
   @Test
-  void test_do_one_placement() throws IOException {
-    StringReader sr = new StringReader("B2V\n");
+  void test_app_init() {
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    PrintStream ps = new PrintStream(bytes, true);
-    Board<Character> b = new BattleShipBoard<Character>(10, 20);
-    App app = new App(b, sr, ps);
+    TextPlayer p1 = createTextPlayer("A", "B2V\n", bytes);
+    TextPlayer p2 = createTextPlayer("B", "C3H\n", bytes);
+    App app = new App(p1, p2);
+    assertNotNull(app);
+  }
 
-    app.doOnePlacement();
-    String expected = 
-      "Where would you like to put your ship?\n" +
-      "  0|1|2|3|4|5|6|7|8|9\n" +
-      "A  | | | | | | | | |  A\n" +
-      "B  | |d| | | | | | |  B\n" +
-      "C  | |d| | | | | | |  C\n" +
-      "D  | |d| | | | | | |  D\n" +
-      "E  | | | | | | | | |  E\n" +
-      "F  | | | | | | | | |  F\n" +
-      "G  | | | | | | | | |  G\n" +
-      "H  | | | | | | | | |  H\n" +
-      "I  | | | | | | | | |  I\n" +
-      "J  | | | | | | | | |  J\n" +
-      "K  | | | | | | | | |  K\n" +
-      "L  | | | | | | | | |  L\n" +
-      "M  | | | | | | | | |  M\n" +
-      "N  | | | | | | | | |  N\n" +
-      "O  | | | | | | | | |  O\n" +
-      "P  | | | | | | | | |  P\n" +
-      "Q  | | | | | | | | |  Q\n" +
-      "R  | | | | | | | | |  R\n" +
-      "S  | | | | | | | | |  S\n" +
-      "T  | | | | | | | | |  T\n" +
-      "  0|1|2|3|4|5|6|7|8|9\n";
-    assertEquals(expected, bytes.toString());
+  @Test
+  void test_do_placement_phase() throws IOException {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    TextPlayer p1 = createTextPlayer("A", "B2V\n", bytes);
+    TextPlayer p2 = createTextPlayer("B", "C3H\n", bytes);
+    App app = new App(p1, p2);
+    app.doPlacementPhase();
+    String output = bytes.toString();
+    assertTrue(output.contains("Player A: you are going to place"));
+    assertTrue(output.contains("Player B: you are going to place"));
   }
 
   @Test
   @ResourceLock(value = Resources.SYSTEM_OUT, mode = ResourceAccessMode.READ_WRITE)
   void test_main() throws IOException {
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(bytes, true);
+    String input = "B2V\nC3H\n";
     
-    String inputString = "B2V\n";
-    InputStream input = new ByteArrayInputStream(inputString.getBytes());
-    assertNotNull(input);
-    
+    // Save the old System.in and System.out
     InputStream oldIn = System.in;
     PrintStream oldOut = System.out;
     
     try {
-        System.setIn(input);
-        System.setOut(out);
-        App.main(new String[0]);
+      // Set up the custom input and output streams
+      ByteArrayInputStream bais = new ByteArrayInputStream(input.getBytes());
+      System.setIn(bais);
+      System.setOut(new PrintStream(bytes, true));
+      
+      // Run the main method
+      App.main(new String[0]);
+      
+      // Check the output
+      String output = bytes.toString();
+      assertTrue(output.contains("Player A: you are going to place"));
+      assertTrue(output.contains("Player B: you are going to place"));
+    } finally {
+      // Restore the original System.in and System.out
+      System.setIn(oldIn);
+      System.setOut(oldOut);
     }
-    finally {
-        System.setIn(oldIn);
-        System.setOut(oldOut);
-    }
-    
-    String expected = 
-      "Where would you like to put your ship?\n" +
-      "  0|1|2|3|4|5|6|7|8|9\n" +
-      "A  | | | | | | | | |  A\n" +
-      "B  | |d| | | | | | |  B\n" +
-      "C  | |d| | | | | | |  C\n" +
-      "D  | |d| | | | | | |  D\n" +
-      "E  | | | | | | | | |  E\n" +
-      "F  | | | | | | | | |  F\n" +
-      "G  | | | | | | | | |  G\n" +
-      "H  | | | | | | | | |  H\n" +
-      "I  | | | | | | | | |  I\n" +
-      "J  | | | | | | | | |  J\n" +
-      "K  | | | | | | | | |  K\n" +
-      "L  | | | | | | | | |  L\n" +
-      "M  | | | | | | | | |  M\n" +
-      "N  | | | | | | | | |  N\n" +
-      "O  | | | | | | | | |  O\n" +
-      "P  | | | | | | | | |  P\n" +
-      "Q  | | | | | | | | |  Q\n" +
-      "R  | | | | | | | | |  R\n" +
-      "S  | | | | | | | | |  S\n" +
-      "T  | | | | | | | | |  T\n" +
-      "  0|1|2|3|4|5|6|7|8|9\n";
-    assertEquals(expected, bytes.toString());
   }
 }
