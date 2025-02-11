@@ -9,12 +9,14 @@ public interface Board<T> {
    * @param toAdd is the ship to add
    * @return true if the ship was successfully added, false otherwise
    */
-  public boolean tryAddShip(Ship<T> toAdd);
+  public String tryAddShip(Ship<T> toAdd);
 
   /**
    * Get what is at a coordinate
    * @param where is the coordinate to check
    * @return what is at that coordinate
    */
-  public T whatIsAt(Coordinate where);
+  public T whatIsAtForSelf(Coordinate where);
+
+  public T whatIsAtForEnemy(Coordinate where);
 } 

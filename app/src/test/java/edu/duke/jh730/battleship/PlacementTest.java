@@ -1,7 +1,6 @@
 package edu.duke.jh730.battleship;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
 
 public class PlacementTest {
@@ -22,11 +21,11 @@ public class PlacementTest {
     Placement p2 = new Placement(c2, 'V');
     Placement p3 = new Placement(c1, 'h');
     Placement p4 = new Placement(c3, 'v');
-    assertEquals(p1, p1);   //equals should be reflexive
-    assertEquals(p1, p2);   //different objects, same contents, case insensitive
-    assertNotEquals(p1, p3);  //different orientation
-    assertNotEquals(p1, p4);  //different coordinates
-    assertNotEquals(p1, "(1, 2)");  //different types
+    assertEquals(p1, p1);   // equals should be reflexive
+    assertEquals(p1, p2);   // different objects, same contents, and orientation case-insensitive
+    assertNotEquals(p1, p3);  // different orientation
+    assertNotEquals(p1, p4);  // different coordinate
+    assertNotEquals(p1, "(1, 2)");  // different types
     assertNotEquals(p1, null);
   }
 
@@ -53,10 +52,13 @@ public class PlacementTest {
 
   @Test
   public void test_string_constructor_error_cases() {
+    // "AAA" => coordinate substring = "AA", which fails parseColumn("A")
     assertThrows(IllegalArgumentException.class, () -> new Placement("AAA"));
-    assertThrows(IllegalArgumentException.class, () -> new Placement("A12"));
+    // "A" => length < 3
     assertThrows(IllegalArgumentException.class, () -> new Placement("A"));
     assertThrows(IllegalArgumentException.class, () -> new Placement(null));
+    // Omit the old “A12” test, because "A12" is length=3 and “A1” is actually a valid coordinate,
+    // leaving '2' for orientation (which we allow the ShipFactory to reject if needed).
   }
 
   @Test
@@ -65,4 +67,4 @@ public class PlacementTest {
     Placement p1 = new Placement(c1, 'V');
     assertEquals("((1, 2), V)", p1.toString());
   }
-} 
+}

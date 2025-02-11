@@ -41,18 +41,29 @@ public class BattleShipBoardTest {
     Character[][] expected = new Character[2][2];
     Coordinate c1 = new Coordinate(1, 0);
     Ship<Character> s1 = new RectangleShip<Character>(c1, 's', '*');
-    assertTrue(b.tryAddShip(s1));
+    assertNull(b.tryAddShip(s1));
     expected[1][0] = 's';
     checkWhatIsAtBoard(b, expected);
 
     // Try to add ship that collides
     Ship<Character> s2 = new RectangleShip<Character>(c1, 'd', '*');
-    assertFalse(b.tryAddShip(s2));
+    assertEquals("That placement is invalid: the ship overlaps another ship.", b.tryAddShip(s2));
     checkWhatIsAtBoard(b, expected);
 
     // Try to add ship out of bounds
     Ship<Character> s3 = new RectangleShip<Character>(new Coordinate(-1, 0), 'b', '*');
-    assertFalse(b.tryAddShip(s3));
+    assertEquals("That placement is invalid: the ship goes off the top of the board.", b.tryAddShip(s3));
     checkWhatIsAtBoard(b, expected);
+  }
+
+  @Test
+  public void test_what_is_at_for_enemy() {
+    BattleShipBoard<Character> b = new BattleShipBoard<Character>(2, 2);
+    Coordinate c1 = new Coordinate(1, 0);
+    Ship<Character> s1 = new RectangleShip<Character>(c1, 's', '*');
+    assertNull(b.tryAddShip(s1));
+    
+    assertEquals('s', b.whatIsAtForEnemy(c1));
+    assertNull(b.whatIsAtForEnemy(new Coordinate(0, 0)));
   }
 } 

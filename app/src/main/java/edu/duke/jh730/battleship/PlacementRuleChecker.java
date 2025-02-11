@@ -7,15 +7,16 @@ public abstract class PlacementRuleChecker<T> {
     this.next = next;
   }
 
-  protected abstract boolean checkMyRule(Ship<T> theShip, Board<T> theBoard);
+  protected abstract String checkMyRule(Ship<T> theShip, Board<T> theBoard);
 
-  public boolean checkPlacement(Ship<T> theShip, Board<T> theBoard) {
-    if (!checkMyRule(theShip, theBoard)) {
-      return false;
+  public String checkPlacement(Ship<T> theShip, Board<T> theBoard) {
+    String myRule = checkMyRule(theShip, theBoard);
+    if (myRule != null) {
+      return myRule;
     }
     if (next != null) {
       return next.checkPlacement(theShip, theBoard);
     }
-    return true;
+    return null;
   }
 } 

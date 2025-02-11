@@ -50,7 +50,7 @@ public class BoardTextView {
       ans.append(" ");
       for (int col = 0; col < toDisplay.getWidth(); col++) {
         ans.append(sep);
-        Character c = toDisplay.whatIsAt(new Coordinate(row, col));
+        Character c = toDisplay.whatIsAtForSelf(new Coordinate(row, col));
         if (c == null) {
           ans.append(" ");
         } else {
