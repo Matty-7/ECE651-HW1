@@ -13,17 +13,8 @@ public class TextPlayer {
   private final AbstractShipFactory<Character> shipFactory;
   private final BoardTextView view;
 
-  /**
-   * Constructs a TextPlayer with the specified parameters.
-   *
-   * @param name        the name of the player (e.g., "A" or "B")
-   * @param theBoard    the Board this player plays on
-   * @param input       the BufferedReader to read user input from
-   * @param out         the PrintStream to write messages to
-   * @param shipFactory the AbstractShipFactory to create ships
-   */
   public TextPlayer(String name, Board<Character> theBoard, BufferedReader input, PrintStream out,
-      AbstractShipFactory<Character> shipFactory) {
+                    AbstractShipFactory<Character> shipFactory) {
     this.name = name;
     this.theBoard = theBoard;
     this.input = input;
@@ -34,19 +25,22 @@ public class TextPlayer {
 
   /**
    * Reads a valid Placement from the user, printing a prompt beforehand.
-   * Repeats until a valid Placement is obtained or if EOF is reached.
+   * Echos the user’s response, and repeats until a valid Placement is obtained
+   * or EOF is reached.
    *
    * @param prompt the message to display to the user
    * @return a valid Placement read from the user
    * @throws IOException if an I/O error occurs (including EOF)
    */
   public Placement readPlacement(String prompt) throws IOException {
-    while (true) {
+    while(true) {
       out.println(prompt);
       String line = input.readLine();
       if (line == null) {
         throw new EOFException("No more input");
       }
+      // Echo the line so tests can see e.g. "A0V" in the output
+      out.println(line);
       try {
         return new Placement(line);
       } catch (IllegalArgumentException e) {
@@ -59,7 +53,7 @@ public class TextPlayer {
    * Asks the user for one Placement of a Destroyer, creates it, and places it
    * on the board. If the placement is invalid or collides with existing ships,
    * this function will print an error message and re-ask until a valid placement
-   * is obtained.
+   * is obtained or EOF occurs.
    *
    * @throws IOException if an I/O error occurs (including EOF)
    */
@@ -83,12 +77,6 @@ public class TextPlayer {
     }
   }
 
-  /**
-   * Displays the board, prints a brief message, and then does exactly
-   * one placement of a single Destroyer, for demonstration up to task18.
-   *
-   * @throws IOException if an I/O error occurs (including EOF)
-   */
   public void doPlacementPhase() throws IOException {
     out.println("Player " + name + ": you are going to place a single Destroyer on your board.");
     out.println("Try placing it, and see if it is valid!");
