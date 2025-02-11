@@ -10,7 +10,6 @@ import java.io.StringReader;
 import java.io.BufferedReader;
 import java.io.InputStream;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -37,8 +36,9 @@ public class AppTest {
   @Test
   void test_do_placement_phase() throws IOException {
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    TextPlayer p1 = createTextPlayer("A", "B2V\n", bytes);
-    TextPlayer p2 = createTextPlayer("B", "C3H\n", bytes);
+    String inputData = "A0V\nB1V\nC2V\nD3V\nE4V\nF5V\nG6V\nH7V\nI8V\nJ9V\n";
+    TextPlayer p1 = createTextPlayer("A", inputData, bytes);
+    TextPlayer p2 = createTextPlayer("B", inputData, bytes);
     App app = new App(p1, p2);
     app.doPlacementPhase();
     String output = bytes.toString();
@@ -50,27 +50,23 @@ public class AppTest {
   @ResourceLock(value = Resources.SYSTEM_OUT, mode = ResourceAccessMode.READ_WRITE)
   void test_main() throws IOException {
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    String input = "B2V\nC3H\n";
+    String input = "A0V\nB1V\nC2V\nD3V\nE4V\nF5V\nG6V\nH7V\nI8V\nJ9V\n" +
+                  "A0V\nB1V\nC2V\nD3V\nE4V\nF5V\nG6V\nH7V\nI8V\nJ9V\n";
     
-    // Save the old System.in and System.out
     InputStream oldIn = System.in;
     PrintStream oldOut = System.out;
     
     try {
-      // Set up the custom input and output streams
       ByteArrayInputStream bais = new ByteArrayInputStream(input.getBytes());
       System.setIn(bais);
       System.setOut(new PrintStream(bytes, true));
       
-      // Run the main method
       App.main(new String[0]);
       
-      // Check the output
       String output = bytes.toString();
       assertTrue(output.contains("Player A: you are going to place"));
       assertTrue(output.contains("Player B: you are going to place"));
     } finally {
-      // Restore the original System.in and System.out
       System.setIn(oldIn);
       System.setOut(oldOut);
     }

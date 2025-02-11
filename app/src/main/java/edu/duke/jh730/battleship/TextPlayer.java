@@ -11,6 +11,12 @@ public class TextPlayer {
   private final PrintStream out;
   private final AbstractShipFactory<Character> shipFactory;
   private final BoardTextView view;
+  
+  // add ship count
+  private int numSubmarines = 2;
+  private int numDestroyers = 3;
+  private int numBattleships = 3;
+  private int numCarriers = 2;
 
   public TextPlayer(String name, Board<Character> theBoard, BufferedReader inputReader, PrintStream out,
       AbstractShipFactory<Character> shipFactory) {
@@ -29,11 +35,44 @@ public class TextPlayer {
   }
 
   public void doOnePlacement() throws IOException {
-    String prompt = String.format("Player %s where do you want to place a Destroyer?", name);
-    Placement p = readPlacement(prompt);
-    Ship<Character> s = shipFactory.makeDestroyer(p);
-    theBoard.tryAddShip(s);
-    out.print(view.displayMyOwnBoard());
+    Ship<Character> s = null;
+    String shipName = "";
+    String prompt = "";
+    
+    if (numSubmarines > 0) {
+      shipName = "Submarine";
+      prompt = String.format("Player %s where do you want to place a %s?", name, shipName);
+      s = shipFactory.makeSubmarine(readPlacement(prompt));
+      numSubmarines--;
+    }
+    else if (numDestroyers > 0) {
+      shipName = "Destroyer";
+      prompt = String.format("Player %s where do you want to place a %s?", name, shipName);
+      s = shipFactory.makeDestroyer(readPlacement(prompt));
+      numDestroyers--;
+    }
+    else if (numBattleships > 0) {
+      shipName = "Battleship";
+      prompt = String.format("Player %s where do you want to place a %s?", name, shipName);
+      s = shipFactory.makeBattleship(readPlacement(prompt));
+      numBattleships--;
+    }
+    else if (numCarriers > 0) {
+      shipName = "Carrier";
+      prompt = String.format("Player %s where do you want to place a %s?", name, shipName);
+      s = shipFactory.makeCarrier(readPlacement(prompt));
+      numCarriers--;
+    }
+
+    if (s != null) {
+      theBoard.tryAddShip(s);
+      out.print(view.displayMyOwnBoard());
+    }
+  }
+
+  public boolean isPlacementDone() {
+    return numSubmarines == 0 && numDestroyers == 0 && 
+           numBattleships == 0 && numCarriers == 0;
   }
 
   public void doPlacementPhase() throws IOException {
@@ -49,6 +88,9 @@ public class TextPlayer {
         "3 \"Battleships\" that are 1x4\n" +
         "2 \"Carriers\" that are 1x6\n",
         name));
-    doOnePlacement();
+    
+    while (!isPlacementDone()) {
+      doOnePlacement();
+    }
   }
 } 
