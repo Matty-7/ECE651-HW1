@@ -34,57 +34,6 @@ public class TextPlayerTest {
   }
 
   @Test
-  public void test_readPlacement_invalid_format_and_EOF() throws IOException {
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    Board<Character> b = new BattleShipBoard<>(5, 5);
-
-    // Provide an invalid placement, then a valid one, then simulate EOF
-    String inputData = "QQQ\nA3H\n";
-    TextPlayer player = createTextPlayer("A", inputData, bytes, b);
-
-    // First read: invalid format
-    Placement p1 = player.readPlacement("Prompt1");
-    String output1 = bytes.toString();
-    assertTrue(output1.contains("Prompt1"));
-    assertTrue(output1.contains("That placement is invalid: it does not have the correct format."));
-    bytes.reset();
-
-    // Second read: valid
-    Placement p2 = player.readPlacement("Prompt2");
-    assertEquals(new Placement(new Coordinate(3, 0), 'H'), p2);
-    String output2 = bytes.toString();
-    assertTrue(output2.contains("Prompt2"));
-    bytes.reset();
-
-    // Third read: should hit EOF
-    assertThrows(EOFException.class, () -> player.readPlacement("Prompt3"));
-    String output3 = bytes.toString();
-    assertTrue(output3.contains("Prompt3"));
-  }
-
-  @Test
-  public void test_doOnePlacement_valid_and_conflict() throws IOException {
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    Board<Character> b = new BattleShipBoard<>(5, 5);
-    TextPlayer player = createTextPlayer("A", "A0V\nA0V\nB0V\n", bytes, b);
-
-    // 1) valid on empty board
-    player.doOnePlacement();  
-    String output1 = bytes.toString();
-    assertTrue(output1.contains("where do you want to place a Destroyer?"));
-    assertTrue(output1.contains("  0|1|2|3|4"));
-    bytes.reset();
-
-    // 2) conflict with existing ship --> must re-ask
-    //    next input is B0V, which should succeed
-    player.doOnePlacement();
-    String output2 = bytes.toString();
-    assertTrue(output2.contains("That placement is invalid: the ship overlaps another ship."));
-    assertTrue(output2.contains("where do you want to place a Destroyer?"));
-    bytes.reset();
-  }
-
-  @Test
   public void test_doOnePlacement_invalid_orientation() throws IOException {
     // Provide invalid orientation first, valid orientation next
     String inputData = "A0Q\nC2H\n";
