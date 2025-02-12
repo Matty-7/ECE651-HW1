@@ -25,7 +25,7 @@ public class TextPlayer {
 
   /**
    * Reads a valid Placement from the user, printing a prompt beforehand.
-   * Echos the user’s response, and repeats until a valid Placement is obtained
+   * Echos the user's response, and repeats until a valid Placement is obtained
    * or EOF is reached.
    *
    * @param prompt the message to display to the user
@@ -82,5 +82,71 @@ public class TextPlayer {
     out.println("Try placing it, and see if it is valid!");
     out.print(view.displayMyOwnBoard());
     doOnePlacement();
+  }
+
+  /**
+   * Play one turn for this player
+   * @param enemyBoard the enemy's board to attack
+   * @param enemyView the enemy's board view
+   * @throws IOException if an I/O error occurs
+   */
+  public void playOneTurn(Board<Character> enemyBoard, BoardTextView enemyView) throws IOException {
+    String prompt = name + "'s turn:\n";
+    out.println(prompt);
+    out.println(view.displayMyBoardWithEnemyNextToIt(enemyView, "Your ocean", "Player B's ocean"));
+    
+    Coordinate c = readCoordinate("Where would you like to fire at?");
+    Ship<Character> ship = enemyBoard.fireAt(c);
+    if (ship != null) {
+      out.println("You hit a " + ship.getName() + "!");
+    } else {
+      out.println("You missed!");
+    }
+  }
+
+  /**
+   * Reads a Coordinate from the user, printing a prompt beforehand.
+   * This version uses manual parsing of the input string so that if the calculated
+   * row or column is negative, those branches are executed (allowing test coverage).
+   *
+   * Expected input format: A letter (for row) followed by a number (for column),
+   * e.g., "A0", "B3", "A-1" (for negative column), or "!0" (for negative row).
+   *
+   * @param prompt the message to display to the user
+   * @return the Coordinate read from the user
+   * @throws IOException if an I/O error occurs
+   */
+  public Coordinate readCoordinate(String prompt) throws IOException {
+    while (true) {
+      out.println(prompt);
+      String s = input.readLine();
+      if (s == null) {
+        throw new EOFException("No more input");
+      }
+      try {
+        char rowChar = s.charAt(0);
+        int row = rowChar - 'A';
+        int col = Integer.parseInt(s.substring(1));
+        if (row < 0) {
+          out.println("Please enter a valid coordinate (e.g., A0)");
+          continue;
+        }
+        if (row >= theBoard.getHeight()) {
+          out.println("Please enter a valid coordinate (e.g., A0)");
+          continue;
+        }
+        if (col < 0) {
+          out.println("Please enter a valid coordinate (e.g., A0)");
+          continue;
+        }
+        if (col >= theBoard.getWidth()) {
+          out.println("Please enter a valid coordinate (e.g., A0)");
+          continue;
+        }
+        return new Coordinate(row, col);
+      } catch (Exception e) {
+        out.println("Please enter a valid coordinate (e.g., A0)");
+      }
+    }
   }
 }
