@@ -93,14 +93,15 @@ public class TextPlayer {
   public void playOneTurn(Board<Character> enemyBoard, BoardTextView enemyView) throws IOException {
     String prompt = name + "'s turn:\n";
     out.println(prompt);
-    out.println(view.displayMyBoardWithEnemyNextToIt(enemyView, "Your ocean", "Player B's ocean"));
+    String enemyName = name.equals("A") ? "B" : "A";
+    out.println(view.displayMyBoardWithEnemyNextToIt(enemyView, "Your ocean", "Player " + enemyName + "'s ocean"));
     
     Coordinate c = readCoordinate("Where would you like to fire at?");
     Ship<Character> ship = enemyBoard.fireAt(c);
     if (ship != null) {
-      out.println("You hit a " + ship.getName() + "!");
+        out.println("You hit a " + ship.getName() + "!");
     } else {
-      out.println("You missed!");
+        out.println("You missed!");
     }
   }
 
@@ -148,5 +149,13 @@ public class TextPlayer {
         out.println("Please enter a valid coordinate (e.g., A0)");
       }
     }
+  }
+
+  /**
+   * Gets the player's board
+   * @return the player's Board
+   */
+  public Board<Character> getBoard() {
+    return theBoard;
   }
 }

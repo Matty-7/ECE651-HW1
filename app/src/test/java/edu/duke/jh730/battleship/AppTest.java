@@ -47,28 +47,27 @@ public class AppTest {
   }
 
   @Test
-  @ResourceLock(value = Resources.SYSTEM_OUT, mode = ResourceAccessMode.READ_WRITE)
   void test_main() throws IOException {
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    String input = "A0V\nB1V\nC2V\nD3V\nE4V\nF5V\nG6V\nH7V\nI8V\nJ9V\n" +
-                  "A0V\nB1V\nC2V\nD3V\nE4V\nF5V\nG6V\nH7V\nI8V\nJ9V\n";
+    PrintStream originalOut = System.out;
+    System.setOut(new PrintStream(bytes));
+
+    String inputDataA = "A0V\nB1\nC1\nD1\n";
+    String inputDataB = "B1V\nA0\nA1\n";
     
-    InputStream oldIn = System.in;
-    PrintStream oldOut = System.out;
+    TextPlayer p1 = createTextPlayer("A", inputDataA, bytes);
+    TextPlayer p2 = createTextPlayer("B", inputDataB, bytes);
+    App app = new App(p1, p2);
     
-    try {
-      ByteArrayInputStream bais = new ByteArrayInputStream(input.getBytes());
-      System.setIn(bais);
-      System.setOut(new PrintStream(bytes, true));
-      
-      App.main(new String[0]);
-      
-      String output = bytes.toString();
-      assertTrue(output.contains("Player A: you are going to place"));
-      assertTrue(output.contains("Player B: you are going to place"));
-    } finally {
-      System.setIn(oldIn);
-      System.setOut(oldOut);
-    }
+    app.doPlacementPhase();
+    app.doAttackingPhase();
+    
+    System.setOut(originalOut);
+
+    String output = bytes.toString();
+    assertTrue(output.contains("Player A: you are going to place"));
+    assertTrue(output.contains("Player B: you are going to place"));
+    assertTrue(output.contains("You hit a"));
+    assertTrue(output.contains("Player A won!"));
   }
 }

@@ -1,7 +1,8 @@
-Where would you like to put your ship?
+Player A: you are going to place a single Destroyer on your board.
+Try placing it, and see if it is valid!
   0|1|2|3|4|5|6|7|8|9
 A  | | | | | | | | |  A
-B  | |s| | | | | | |  B
+B  | | | | | | | | |  B
 C  | | | | | | | | |  C
 D  | | | | | | | | |  D
 E  | | | | | | | | |  E
@@ -20,4 +21,76 @@ Q  | | | | | | | | |  Q
 R  | | | | | | | | |  R
 S  | | | | | | | | |  S
 T  | | | | | | | | |  T
-  0|1|2|3|4|5|6|7|8|9 
+  0|1|2|3|4|5|6|7|8|9
+Player A where do you want to place a Destroyer?
+A0V
+  0|1|2|3|4|5|6|7|8|9
+A d| | | | | | | | |  A
+B d| | | | | | | | |  B
+C d| | | | | | | | |  C
+D  | | | | | | | | |  D
+E  | | | | | | | | |  E
+F  | | | | | | | | |  F
+G  | | | | | | | | |  G
+H  | | | | | | | | |  H
+I  | | | | | | | | |  I
+J  | | | | | | | | |  J
+K  | | | | | | | | |  K
+L  | | | | | | | | |  L
+M  | | | | | | | | |  M
+N  | | | | | | | | |  N
+O  | | | | | | | | |  O
+P  | | | | | | | | |  P
+Q  | | | | | | | | |  Q
+R  | | | | | | | | |  R
+S  | | | | | | | | |  S
+T  | | | | | | | | |  T
+  0|1|2|3|4|5|6|7|8|9
+Player B: you are going to place a single Destroyer on your board.
+Try placing it, and see if it is valid!
+  0|1|2|3|4|5|6|7|8|9
+A  | | | | | | | | |  A
+B  | | | | | | | | |  B
+C  | | | | | | | | |  C
+D  | | | | | | | | |  D
+E  | | | | | | | | |  E
+F  | | | | | | | | |  F
+G  | | | | | | | | |  G
+H  | | | | | | | | |  H
+I  | | | | | | | | |  I
+J  | | | | | | | | |  J
+K  | | | | | | | | |  K
+L  | | | | | | | | |  L
+M  | | | | | | | | |  M
+N  | | | | | | | | |  N
+O  | | | | | | | | |  O
+P  | | | | | | | | |  P
+Q  | | | | | | | | |  Q
+R  | | | | | | | | |  R
+S  | | | | | | | | |  S
+T  | | | | | | | | |  T
+  0|1|2|3|4|5|6|7|8|9
+Player B where do you want to place a Destroyer?
+I5V
+  0|1|2|3|4|5|6|7|8|9
+A  | | | | | | | | |  A
+B  | | | | | | | | |  B
+C  | | | | | | | | |  C
+D  | | | | | | | | |  D
+E  | | | | | | | | |  E
+F  | | | | | | | | |  F
+G  | | | | | | | | |  G
+H  | | | | | | | | |  H
+I  | | | | |d| | | |  I
+J  | | | | |d| | | |  J
+K  | | | | |d| | | |  K
+L  | | | | | | | | |  L
+M  | | | | | | | | |  M
+N  | | | | | | | | |  N
+O  | | | | | | | | |  O
+P  | | | | | | | | |  P
+Q  | | | | | | | | |  Q
+R  | | | | | | | | |  R
+S  | | | | | | | | |  S
+T  | | | | | | | | |  T
+  0|1|2|3|4|5|6|7|8|9
