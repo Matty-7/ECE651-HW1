@@ -78,10 +78,73 @@ public class TextPlayer {
   }
 
   public void doPlacementPhase() throws IOException {
-    out.println("Player " + name + ": you are going to place a single Destroyer on your board.");
-    out.println("Try placing it, and see if it is valid!");
+    out.println("Player " + name + ": you are going to place the following ships (which are all");
+    out.println("rectangular). For each ship, type the coordinate of the upper left");
+    out.println("side of the ship, followed by either H (for horizontal) or V (for");
+    out.println("vertical). For example M4H would place a ship horizontally starting");
+    out.println("at M4 and going to the right. You have");
+    out.println("");
+    out.println("2 \"Submarines\" ships that are 1x2");
+    out.println("3 \"Destroyers\" that are 1x3");
+    out.println("3 \"Battleships\" that are 1x4");
+    out.println("2 \"Carriers\" that are 1x6");
+    out.println("");
     out.print(view.displayMyOwnBoard());
-    doOnePlacement();
+
+    // Place 2 Submarines
+    for (int i = 0; i < 2; i++) {
+        doOnePlacement("Submarine");
+    }
+    
+    // Place 3 Destroyers
+    for (int i = 0; i < 3; i++) {
+        doOnePlacement("Destroyer");
+    }
+    
+    // Place 3 Battleships
+    for (int i = 0; i < 3; i++) {
+        doOnePlacement("Battleship");
+    }
+    
+    // Place 2 Carriers
+    for (int i = 0; i < 2; i++) {
+        doOnePlacement("Carrier");
+    }
+  }
+
+  public void doOnePlacement(String shipName) throws IOException {
+    while (true) {
+        Placement p = readPlacement("Player " + name + " where do you want to place a " + shipName + "?");
+        Ship<Character> s;
+        try {
+            switch (shipName) {
+                case "Submarine":
+                    s = shipFactory.makeSubmarine(p);
+                    break;
+                case "Destroyer":
+                    s = shipFactory.makeDestroyer(p);
+                    break;
+                case "Battleship":
+                    s = shipFactory.makeBattleship(p);
+                    break;
+                case "Carrier":
+                    s = shipFactory.makeCarrier(p);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown ship type: " + shipName);
+            }
+        } catch (IllegalArgumentException e) {
+            out.println("That placement is invalid: it does not have a valid orientation.");
+            continue;
+        }
+        String addShipError = theBoard.tryAddShip(s);
+        if (addShipError == null) {
+            out.print(view.displayMyOwnBoard());
+            break;
+        } else {
+            out.println("That placement is invalid: " + addShipError);
+        }
+    }
   }
 
   /**
@@ -91,17 +154,25 @@ public class TextPlayer {
    * @throws IOException if an I/O error occurs
    */
   public void playOneTurn(Board<Character> enemyBoard, BoardTextView enemyView) throws IOException {
-    String prompt = name + "'s turn:\n";
-    out.println(prompt);
     String enemyName = name.equals("A") ? "B" : "A";
+    out.println("\nPlayer " + name + "'s turn:");
     out.println(view.displayMyBoardWithEnemyNextToIt(enemyView, "Your ocean", "Player " + enemyName + "'s ocean"));
+    out.println("Where would you like to fire at?");
     
-    Coordinate c = readCoordinate("Where would you like to fire at?");
-    Ship<Character> ship = enemyBoard.fireAt(c);
-    if (ship != null) {
-        out.println("You hit a " + ship.getName() + "!");
-    } else {
-        out.println("You missed!");
+    while (true) {
+        Coordinate c = readCoordinate("Enter coordinate: ");
+        if (enemyBoard.wasAlreadyShot(c)) {
+            out.println("You already fired at this coordinate. Please choose another location.");
+            continue;
+        }
+        
+        Ship<Character> ship = enemyBoard.fireAt(c);
+        if (ship != null) {
+            out.println("You hit a " + ship.getName() + "!");
+        } else {
+            out.println("You missed!");
+        }
+        break;
     }
   }
 

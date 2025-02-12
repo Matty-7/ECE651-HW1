@@ -85,7 +85,7 @@ public class BoardTextViewTest {
                      "  0|1                    0|1\n" +
                      "A  |  A                A  |  A\n" +
                      "B  |  B                B  |  B\n" +
-                     "  0|1\n";
+                     "  0|1                    0|1\n";
     assertEquals(expected, view1.displayMyBoardWithEnemyNextToIt(view2, "Your ocean", "Player B's ocean"));
 
     // Test different width

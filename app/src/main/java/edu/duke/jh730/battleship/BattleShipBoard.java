@@ -10,6 +10,7 @@ public class BattleShipBoard<T> implements Board<T> {
   private final PlacementRuleChecker<T> placementChecker;
   private final HashSet<Coordinate> enemyMisses;
   private final T missInfo;
+  private final HashSet<Coordinate> allShots;
 
   /**
    * Constructor for BattleShipBoard
@@ -31,6 +32,7 @@ public class BattleShipBoard<T> implements Board<T> {
     this.myShips = new ArrayList<Ship<T>>();
     this.placementChecker = placementChecker;
     this.enemyMisses = new HashSet<Coordinate>();
+    this.allShots = new HashSet<Coordinate>();
     this.missInfo = missInfo;
   }
 
@@ -76,14 +78,24 @@ public class BattleShipBoard<T> implements Board<T> {
 
   @Override
   public Ship<T> fireAt(Coordinate c) {
-    for (Ship<T> s : myShips) {
-      if (s.occupiesCoordinates(c)) {
-        s.recordHitAt(c);
-        return s;
-      }
+    if (allShots.contains(c)) {
+        return null;
     }
-    enemyMisses.add(c);
-    return null;
+    
+    Ship<T> hitShip = null;
+    for (Ship<T> s : myShips) {
+        if (s.occupiesCoordinates(c)) {
+            s.recordHitAt(c);
+            hitShip = s;
+            break;
+        }
+    }
+    
+    allShots.add(c);
+    if (hitShip == null) {
+        enemyMisses.add(c);
+    }
+    return hitShip;
   }
 
   protected T whatIsAt(Coordinate where, boolean isSelf) {
@@ -106,5 +118,10 @@ public class BattleShipBoard<T> implements Board<T> {
       }
     }
     return true;
+  }
+
+  @Override
+  public boolean wasAlreadyShot(Coordinate where) {
+    return allShots.contains(where);
   }
 } 

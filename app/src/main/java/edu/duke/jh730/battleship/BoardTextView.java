@@ -73,31 +73,29 @@ public class BoardTextView {
    * @throws IllegalArgumentException if enemy board has different dimensions
    */
   public String displayMyBoardWithEnemyNextToIt(BoardTextView enemyView, String myHeader, String enemyHeader) {
-    if (toDisplay.getWidth() != enemyView.toDisplay.getWidth() ||
-        toDisplay.getHeight() != enemyView.toDisplay.getHeight()) {
-      throw new IllegalArgumentException("Enemy board must have the same dimensions as my board");
+    if (enemyView.toDisplay.getWidth() != toDisplay.getWidth()) {
+        throw new IllegalArgumentException("Enemy board must have the same width as my board");
     }
-    String[] myLines = displayMyOwnBoard().split("\n");
-    String[] enemyLines = enemyView.displayEnemyBoard().split("\n");
-    
+    if (enemyView.toDisplay.getHeight() != toDisplay.getHeight()) {
+        throw new IllegalArgumentException("Enemy board must have the same height as my board");
+    }
+
     StringBuilder ans = new StringBuilder();
-    int offset = 2 * toDisplay.getWidth() + 19;
-    
-    // Add headers
-    ans.append(String.format("%-5s", "")).append(myHeader);
-    ans.append(" ".repeat(offset - myHeader.length() - 5));
-    ans.append(enemyHeader).append("\n");
-    
-    // Add board content
-    for (int i = 0; i < myLines.length - 1; i++) {
-      ans.append(myLines[i]);
-      ans.append(" ".repeat(offset - myLines[i].length()));
-      ans.append(enemyLines[i]).append("\n");
+    String myBoard = this.displayMyOwnBoard();
+    String enemyBoard = enemyView.displayEnemyBoard();
+    String[] myLines = myBoard.split("\n");
+    String[] enemyLines = enemyBoard.split("\n");
+
+    // Add the header line with both titles
+    ans.append(String.format("%-" + (myLines[0].length() + 4) + "s%s\n", myHeader, enemyHeader));
+
+    // For each line of the board
+    for (int i = 0; i < myLines.length; i++) {
+        ans.append(String.format("%-" + (myLines[0].length() + 4) + "s%s\n", 
+                               myLines[i], 
+                               (i < enemyLines.length) ? enemyLines[i] : ""));
     }
-    
-    // Add final line
-    ans.append(myLines[myLines.length - 1]).append("\n");
-    
+
     return ans.toString();
   }
 } 

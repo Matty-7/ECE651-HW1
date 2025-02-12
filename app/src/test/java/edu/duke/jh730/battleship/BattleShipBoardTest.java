@@ -129,4 +129,29 @@ public class BattleShipBoardTest {
     b.fireAt(new Coordinate(1, 1));
     assertTrue(b.isAllSunk());
   }
+
+  @Test
+  public void test_repeat_fire() {
+    BattleShipBoard<Character> b = new BattleShipBoard<Character>(3, 3, 'X');
+    Coordinate c1 = new Coordinate(1, 1);
+    Ship<Character> s1 = new RectangleShip<Character>(c1, 's', '*');
+    b.tryAddShip(s1);
+
+    // First shot
+    Ship<Character> hitShip = b.fireAt(c1);
+    assertSame(s1, hitShip);
+    assertTrue(b.wasAlreadyShot(c1));
+
+    // Repeat shot
+    hitShip = b.fireAt(c1);
+    assertNull(hitShip);  // 表示这是一个无效的重复攻击
+    
+    // Shot at empty space
+    Coordinate c2 = new Coordinate(0, 0);
+    assertNull(b.fireAt(c2));
+    assertTrue(b.wasAlreadyShot(c2));
+    
+    // Repeat shot at empty space
+    assertNull(b.fireAt(c2));
+  }
 } 

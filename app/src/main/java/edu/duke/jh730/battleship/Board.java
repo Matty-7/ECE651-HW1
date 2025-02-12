@@ -23,4 +23,11 @@ public interface Board<T> {
   public Ship<T> fireAt(Coordinate c);
 
   public boolean isAllSunk();
+
+  /**
+   * Check if a coordinate has already been fired at
+   * @param where is the coordinate to check
+   * @return true if this coordinate has already been fired at
+   */
+  public boolean wasAlreadyShot(Coordinate where);
 } 
