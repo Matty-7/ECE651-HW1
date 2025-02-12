@@ -103,4 +103,30 @@ public class BattleShipBoardTest {
     assertEquals('X', b.whatIsAtForEnemy(c2));
     assertNull(b.whatIsAtForSelf(c2));
   }
+
+  @Test
+  public void test_is_all_sunk() {
+    BattleShipBoard<Character> b = new BattleShipBoard<Character>(3, 3, 'X');
+    
+    // Empty board should return true
+    assertTrue(b.isAllSunk());
+    
+    // Add one ship
+    Ship<Character> s1 = new RectangleShip<Character>(new Coordinate(0, 0), 's', '*');
+    b.tryAddShip(s1);
+    assertFalse(b.isAllSunk());
+    
+    // Hit the ship
+    b.fireAt(new Coordinate(0, 0));
+    assertTrue(b.isAllSunk());
+    
+    // Add another ship
+    Ship<Character> s2 = new RectangleShip<Character>(new Coordinate(1, 1), 'd', '*');
+    b.tryAddShip(s2);
+    assertFalse(b.isAllSunk());
+    
+    // Hit both ships
+    b.fireAt(new Coordinate(1, 1));
+    assertTrue(b.isAllSunk());
+  }
 } 
