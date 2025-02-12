@@ -39,9 +39,9 @@ public class RectangleShipTest {
     Coordinate c1 = new Coordinate(1, 2);
     RectangleShip<Character> ship = new RectangleShip<Character>("testship", c1, 1, 1, 's', '*');
     
-    assertEquals('s', ship.getDisplayInfoAt(c1));
+    assertEquals('s', ship.getDisplayInfoAt(c1, true));
     ship.recordHitAt(c1);
-    assertEquals('*', ship.getDisplayInfoAt(c1));
+    assertEquals('*', ship.getDisplayInfoAt(c1, true));
   }
 
   @Test
@@ -52,6 +52,6 @@ public class RectangleShipTest {
     
     assertThrows(IllegalArgumentException.class, () -> ship.recordHitAt(c2));
     assertThrows(IllegalArgumentException.class, () -> ship.wasHitAt(c2));
-    assertThrows(IllegalArgumentException.class, () -> ship.getDisplayInfoAt(c2));
+    assertThrows(IllegalArgumentException.class, () -> ship.getDisplayInfoAt(c2, true));
   }
 } 

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 public class InBoundsRuleCheckerTest {
   @Test
   public void test_check_in_bounds() {
-    Board<Character> b = new BattleShipBoard<Character>(10, 20);
+    Board<Character> b = new BattleShipBoard<Character>(10, 20, 'X');
     V1ShipFactory f = new V1ShipFactory();
     InBoundsRuleChecker<Character> checker = new InBoundsRuleChecker<>(null);
     
@@ -43,7 +43,7 @@ public class InBoundsRuleCheckerTest {
 
   @Test
   public void test_rule_chain() {
-    Board<Character> b = new BattleShipBoard<Character>(10, 20);
+    Board<Character> b = new BattleShipBoard<Character>(10, 20, 'X');
     V1ShipFactory f = new V1ShipFactory();
     
     // Create a rule chain: InBoundsRuleChecker -> InBoundsRuleChecker
@@ -62,7 +62,7 @@ public class InBoundsRuleCheckerTest {
 
   @Test
   public void test_check_my_rule() {
-    Board<Character> b = new BattleShipBoard<Character>(10, 20);
+    Board<Character> b = new BattleShipBoard<Character>(10, 20, 'X');
     V1ShipFactory f = new V1ShipFactory();
     InBoundsRuleChecker<Character> checker = new InBoundsRuleChecker<>(null);
     

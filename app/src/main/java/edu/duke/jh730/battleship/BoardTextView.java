@@ -1,5 +1,7 @@
 package edu.duke.jh730.battleship;
 
+import java.util.function.Function;
+
 /**
  * It supports two ways to display the Board:
  * one for the player's own board, and one for the 
@@ -36,34 +38,29 @@ public class BoardTextView {
     return ans.toString();
   }
 
-  /**
-   * This displays the board
-   * @return the String that is the board
-   */
-  public String displayMyOwnBoard() {
+  protected String displayAnyBoard(Function<Coordinate, Character> getSquareFn) {
     StringBuilder ans = new StringBuilder();
     ans.append(makeHeader());
-    
     for (int row = 0; row < toDisplay.getHeight(); row++) {
+      ans.append((char)('A' + row)).append(" ");
       String sep = "";
-      ans.append((char)('A' + row));
-      ans.append(" ");
-      for (int col = 0; col < toDisplay.getWidth(); col++) {
+      for (int column = 0; column < toDisplay.getWidth(); column++) {
         ans.append(sep);
-        Character c = toDisplay.whatIsAtForSelf(new Coordinate(row, col));
-        if (c == null) {
-          ans.append(" ");
-        } else {
-          ans.append(c);
-        }
+        Character what = getSquareFn.apply(new Coordinate(row, column));
+        ans.append(what == null ? " " : what);
         sep = "|";
       }
-      ans.append(" ");
-      ans.append((char)('A' + row));
-      ans.append("\n");
+      ans.append(" ").append((char)('A' + row)).append("\n");
     }
-    
     ans.append(makeHeader());
     return ans.toString();
+  }
+
+  public String displayMyOwnBoard() {
+    return displayAnyBoard((c) -> toDisplay.whatIsAtForSelf(c));
+  }
+
+  public String displayEnemyBoard() {
+    return displayAnyBoard((c) -> toDisplay.whatIsAtForEnemy(c));
   }
 } 

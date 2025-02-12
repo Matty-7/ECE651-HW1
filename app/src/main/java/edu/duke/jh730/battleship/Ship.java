@@ -40,10 +40,11 @@ public interface Ship<T> {
   /**
    * Get the display information for a given coordinate
    * @param where is the coordinate to return information for
+   * @param myShip true if viewing from own board, false if viewing from enemy's board
    * @throws IllegalArgumentException if where is not part of the Ship
    * @return The view-specific information at that coordinate.
    */
-  public T getDisplayInfoAt(Coordinate where);
+  public T getDisplayInfoAt(Coordinate where, boolean myShip);
 
   /**
    * Get all of the Coordinates that this Ship occupies.

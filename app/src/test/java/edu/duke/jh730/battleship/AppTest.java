@@ -19,7 +19,7 @@ public class AppTest {
   private TextPlayer createTextPlayer(String name, String inputData, ByteArrayOutputStream bytes) {
     BufferedReader input = new BufferedReader(new StringReader(inputData));
     PrintStream output = new PrintStream(bytes, true);
-    Board<Character> board = new BattleShipBoard<Character>(10, 20);
+    Board<Character> board = new BattleShipBoard<Character>(10, 20, 'X');
     V1ShipFactory shipFactory = new V1ShipFactory();
     return new TextPlayer(name, board, input, output, shipFactory);
   }

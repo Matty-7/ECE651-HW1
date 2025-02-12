@@ -15,29 +15,29 @@ public class BattleShipBoardTest {
 
   @Test
   public void test_invalid_dimensions() {
-    assertThrows(IllegalArgumentException.class, () -> new BattleShipBoard<Character>(0, 2));
-    assertThrows(IllegalArgumentException.class, () -> new BattleShipBoard<Character>(2, 0));
-    assertThrows(IllegalArgumentException.class, () -> new BattleShipBoard<Character>(-1, 2));
-    assertThrows(IllegalArgumentException.class, () -> new BattleShipBoard<Character>(2, -1));
+    assertThrows(IllegalArgumentException.class, () -> new BattleShipBoard<Character>(0, 2, 'X'));
+    assertThrows(IllegalArgumentException.class, () -> new BattleShipBoard<Character>(2, 0, 'X'));
+    assertThrows(IllegalArgumentException.class, () -> new BattleShipBoard<Character>(-1, 2, 'X'));
+    assertThrows(IllegalArgumentException.class, () -> new BattleShipBoard<Character>(2, -1, 'X'));
   }
 
   @Test
   public void test_width_height() {
-    Board<Character> b1 = new BattleShipBoard<Character>(10, 20);
+    Board<Character> b1 = new BattleShipBoard<Character>(10, 20, 'X');
     assertEquals(10, b1.getWidth());
     assertEquals(20, b1.getHeight());
   }
 
   @Test
   public void test_empty_board() {
-    BattleShipBoard<Character> b = new BattleShipBoard<Character>(2, 2);
+    BattleShipBoard<Character> b = new BattleShipBoard<Character>(2, 2, 'X');
     Character[][] expected = new Character[2][2];
     checkWhatIsAtBoard(b, expected);
   }
 
   @Test
   public void test_add_ship() {
-    BattleShipBoard<Character> b = new BattleShipBoard<Character>(2, 2);
+    BattleShipBoard<Character> b = new BattleShipBoard<Character>(2, 2, 'X');
     Character[][] expected = new Character[2][2];
     Coordinate c1 = new Coordinate(1, 0);
     Ship<Character> s1 = new RectangleShip<Character>(c1, 's', '*');
@@ -58,12 +58,49 @@ public class BattleShipBoardTest {
 
   @Test
   public void test_what_is_at_for_enemy() {
-    BattleShipBoard<Character> b = new BattleShipBoard<Character>(2, 2);
+    BattleShipBoard<Character> b = new BattleShipBoard<Character>(2, 2, 'X');
     Coordinate c1 = new Coordinate(1, 0);
     Ship<Character> s1 = new RectangleShip<Character>(c1, 's', '*');
     assertNull(b.tryAddShip(s1));
     
-    assertEquals('s', b.whatIsAtForEnemy(c1));
+    // Before hitting, should see nothing
+    assertNull(b.whatIsAtForEnemy(c1));
     assertNull(b.whatIsAtForEnemy(new Coordinate(0, 0)));
+
+    // After hitting, should see the ship
+    b.fireAt(c1);
+    assertEquals('s', b.whatIsAtForEnemy(c1));
+  }
+
+  @Test
+  public void test_fireAt() {
+    BattleShipBoard<Character> b = new BattleShipBoard<Character>(3, 3, 'X');
+    Coordinate c1 = new Coordinate(1, 1);
+    Ship<Character> s1 = new RectangleShip<Character>(c1, 's', '*');
+    b.tryAddShip(s1);
+
+    // Test hit
+    Ship<Character> hitShip = b.fireAt(c1);
+    assertSame(s1, hitShip);
+    assertTrue(s1.wasHitAt(c1));
+    assertTrue(s1.isSunk());
+
+    // Test miss
+    Coordinate c2 = new Coordinate(0, 0);
+    assertNull(b.fireAt(c2));
+  }
+
+  @Test
+  public void test_miss_display() {
+    BattleShipBoard<Character> b = new BattleShipBoard<Character>(3, 3, 'X');
+    Coordinate c1 = new Coordinate(1, 1);
+    Ship<Character> s1 = new RectangleShip<Character>(c1, 's', '*');
+    b.tryAddShip(s1);
+
+    // Test miss
+    Coordinate c2 = new Coordinate(0, 0);
+    assertNull(b.fireAt(c2));
+    assertEquals('X', b.whatIsAtForEnemy(c2));
+    assertNull(b.whatIsAtForSelf(c2));
   }
 } 

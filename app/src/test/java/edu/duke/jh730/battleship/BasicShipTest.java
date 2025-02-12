@@ -12,7 +12,7 @@ public class BasicShipTest {
     assertTrue(s1.occupiesCoordinates(c1));
     Coordinate c2 = new Coordinate(1, 3);
     assertFalse(s1.occupiesCoordinates(c2));
-    assertEquals('s', s1.getDisplayInfoAt(c1));
+    assertEquals('s', s1.getDisplayInfoAt(c1, true));
   }
 
   @Test

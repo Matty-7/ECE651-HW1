@@ -24,7 +24,7 @@ public class TextPlayerTest {
   @Test
   public void test_readPlacement_valid() throws IOException {
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    Board<Character> b = new BattleShipBoard<>(5, 5);
+    Board<Character> b = new BattleShipBoard<Character>(5, 5, 'X');
     TextPlayer player = createTextPlayer("A", "A0V\n", bytes, b);
 
     Placement p = player.readPlacement("Enter a placement:");
@@ -38,7 +38,7 @@ public class TextPlayerTest {
     // Provide invalid orientation first, valid orientation next
     String inputData = "A0Q\nC2H\n";
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    Board<Character> b = new BattleShipBoard<>(5, 5);
+    Board<Character> b = new BattleShipBoard<Character>(5, 5, 'X');
     TextPlayer player = createTextPlayer("A", inputData, bytes, b);
 
     player.doOnePlacement();
@@ -52,7 +52,7 @@ public class TextPlayerTest {
   public void test_doPlacementPhase() throws IOException {
     String inputData = "A0V\nB1H\n";
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    Board<Character> b = new BattleShipBoard<>(5, 5);
+    Board<Character> b = new BattleShipBoard<Character>(5, 5, 'X');
     TextPlayer player = createTextPlayer("A", inputData, bytes, b);
 
     player.doPlacementPhase();

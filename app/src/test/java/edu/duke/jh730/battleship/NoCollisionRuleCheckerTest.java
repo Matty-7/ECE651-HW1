@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 public class NoCollisionRuleCheckerTest {
   @Test
   public void test_check_my_rule() {
-    Board<Character> b = new BattleShipBoard<Character>(10, 20);
+    Board<Character> b = new BattleShipBoard<Character>(10, 20, 'X');
     V1ShipFactory f = new V1ShipFactory();
     NoCollisionRuleChecker<Character> checker = new NoCollisionRuleChecker<>(null);
     
@@ -29,7 +29,7 @@ public class NoCollisionRuleCheckerTest {
   public void test_rule_chain() {
     PlacementRuleChecker<Character> noCollision = new NoCollisionRuleChecker<>(null);
     PlacementRuleChecker<Character> checker = new InBoundsRuleChecker<>(noCollision);
-    Board<Character> b = new BattleShipBoard<Character>(10, 20);
+    Board<Character> b = new BattleShipBoard<Character>(10, 20, 'X');
     V1ShipFactory f = new V1ShipFactory();
     
     // Test valid placement through chain
