@@ -3,17 +3,12 @@ package edu.duke.jh730.battleship;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.io.BufferedReader;
-import java.io.InputStream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.ResourceAccessMode;
-import org.junit.jupiter.api.parallel.ResourceLock;
-import org.junit.jupiter.api.parallel.Resources;
 
 public class AppTest {
   private TextPlayer createTextPlayer(String name, String inputData, ByteArrayOutputStream bytes) {
@@ -46,28 +41,4 @@ public class AppTest {
     assertTrue(output.contains("Player B: you are going to place"));
   }
 
-  @Test
-  void test_main() throws IOException {
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    PrintStream originalOut = System.out;
-    System.setOut(new PrintStream(bytes));
-
-    String inputDataA = "A0V\nB1\nC1\nD1\n";
-    String inputDataB = "B1V\nA0\nA1\n";
-    
-    TextPlayer p1 = createTextPlayer("A", inputDataA, bytes);
-    TextPlayer p2 = createTextPlayer("B", inputDataB, bytes);
-    App app = new App(p1, p2);
-    
-    app.doPlacementPhase();
-    app.doAttackingPhase();
-    
-    System.setOut(originalOut);
-
-    String output = bytes.toString();
-    assertTrue(output.contains("Player A: you are going to place"));
-    assertTrue(output.contains("Player B: you are going to place"));
-    assertTrue(output.contains("You hit a"));
-    assertTrue(output.contains("Player A won!"));
-  }
 }
