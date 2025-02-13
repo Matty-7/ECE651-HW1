@@ -81,17 +81,58 @@ public class TextPlayerTest {
 
   @Test
   public void test_doPlacementPhase() throws IOException {
-    String inputData = "A0V\nB1H\n";
+    // 2 Submarines:
+    // "A0V" places a submarine at A0 (covering A0 and B0)
+    // "A2V" places a submarine at A2 (covering A2 and B2)
+    //
+    // 3 Destroyers (each is 1x3 when placed horizontally):
+    // "C0H" places a destroyer at C0 (covering C0, C1, C2)
+    // "C3H" places a destroyer at C3 (covering C3, C4, C5)
+    // "C6H" places a destroyer at C6 (covering C6, C7, C8)
+    //
+    // 3 Battleships (each is 1x4 when placed vertically):
+    // "D0V" places a battleship at D0 (covering D0, E0, F0, G0)
+    // "D2V" places a battleship at D2 (covering D2, E2, F2, G2)
+    // "D4V" places a battleship at D4 (covering D4, E4, F4, G4)
+    //
+    // 2 Carriers (each is 1x6 when placed horizontally):
+    // "H0H" places a carrier at H0 (covering H0, H1, H2, H3, H4, H5)
+    // "I0H" places a carrier at I0 (covering I0, I1, I2, I3, I4, I5)
+    String inputData = "A0V\n" +   // Submarine #1
+                       "A2V\n" +   // Submarine #2
+                       "C0H\n" +   // Destroyer #1
+                       "C3H\n" +   // Destroyer #2
+                       "C6H\n" +   // Destroyer #3
+                       "D0V\n" +   // Battleship #1
+                       "D2V\n" +   // Battleship #2
+                       "D4V\n" +   // Battleship #3
+                       "H0H\n" +   // Carrier #1
+                       "I0H\n";    // Carrier #2
+    
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    Board<Character> b = new BattleShipBoard<Character>(5, 5, 'X');
+    Board<Character> b = new BattleShipBoard<Character>(10, 20, 'X');
     TextPlayer player = createTextPlayer("A", inputData, bytes, b);
 
     player.doPlacementPhase();
     String outString = bytes.toString();
-    assertTrue(outString.contains("Player A: you are going to place a single Destroyer on your board."));
-    assertTrue(outString.contains("Try placing it, and see if it is valid!"));
+
+    // Check that we prompted for each type of ship.
+    assertTrue(outString.contains("Player A where do you want to place a Submarine?"));
+    assertTrue(outString.contains("Player A where do you want to place a Destroyer?"));
+    assertTrue(outString.contains("Player A where do you want to place a Battleship?"));
+    assertTrue(outString.contains("Player A where do you want to place a Carrier?"));
+
+    // Check that each input coordinate appears in the output (these are echoed)
     assertTrue(outString.contains("A0V"));
-    assertTrue(outString.contains("where do you want to place a Destroyer?"));
+    assertTrue(outString.contains("A2V"));
+    assertTrue(outString.contains("C0H"));
+    assertTrue(outString.contains("C3H"));
+    assertTrue(outString.contains("C6H"));
+    assertTrue(outString.contains("D0V"));
+    assertTrue(outString.contains("D2V"));
+    assertTrue(outString.contains("D4V"));
+    assertTrue(outString.contains("H0H"));
+    assertTrue(outString.contains("I0H"));
   }
 
   @Test
