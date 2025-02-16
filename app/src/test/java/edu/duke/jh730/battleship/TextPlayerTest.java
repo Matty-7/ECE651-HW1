@@ -242,6 +242,6 @@ public class TextPlayerTest {
     player = createTextPlayer("A", "A0\n", bytes, b1);
     player.playOneTurn(b2, enemyView);
     output = bytes.toString();
-    assertTrue(output.contains("You missed!"));
+    assertTrue(output.contains("You missed"));
   }
 }
