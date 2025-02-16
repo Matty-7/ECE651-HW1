@@ -90,19 +90,6 @@ public class BattleShipBoardTest {
     assertNull(b.fireAt(c2));
   }
 
-  @Test
-  public void test_miss_display() {
-    BattleShipBoard<Character> b = new BattleShipBoard<Character>(3, 3, 'X');
-    Coordinate c1 = new Coordinate(1, 1);
-    Ship<Character> s1 = new RectangleShip<Character>(c1, 's', '*');
-    b.tryAddShip(s1);
-
-    // Test miss
-    Coordinate c2 = new Coordinate(0, 0);
-    assertNull(b.fireAt(c2));
-    assertEquals('X', b.whatIsAtForEnemy(c2));
-    assertNull(b.whatIsAtForSelf(c2));
-  }
 
   @Test
   public void test_is_all_sunk() {

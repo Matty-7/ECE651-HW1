@@ -299,6 +299,9 @@ public class TextPlayer {
         Ship<Character> ship = enemyBoard.fireAt(c);
         if (ship != null) {
             out.println("You hit a " + ship.getName());
+            if (ship.isSunk()) {
+                out.println("Player " + enemyName + "'s " + ship.getName() + " has been destroyed!");
+            }
         } else {
             out.println("You missed");
         }

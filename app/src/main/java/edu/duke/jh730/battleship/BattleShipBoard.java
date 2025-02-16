@@ -101,7 +101,22 @@ public class BattleShipBoard<T> implements Board<T> {
   protected T whatIsAt(Coordinate where, boolean isSelf) {
     for (Ship<T> s: myShips) {
       if (s.occupiesCoordinates(where)) {
-        return s.getDisplayInfoAt(where, isSelf);
+        if (isSelf) {
+          return s.getDisplayInfoAt(where, true);
+        } else {
+          // For enemy view
+          if (!s.wasHitAt(where)) {
+            return null;
+          }
+          // If the ship is hit at this location
+          if (s.isSunk()) {
+            // If the ship is sunk, show its actual symbol
+            return s.getDisplayInfoAt(where, true);
+          } else {
+            // If hit but not sunk, show *
+            return (T) Character.valueOf('*');
+          }
+        }
       }
     }
     if (!isSelf && enemyMisses.contains(where)) {

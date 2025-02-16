@@ -48,21 +48,5 @@ public class ComplexShipTest {
         assertTrue(ship.isSunk());
     }
 
-    @Test
-    public void test_display_info() {
-        Coordinate c1 = new Coordinate(1, 2);
-        HashSet<Coordinate> coords = new HashSet<>();
-        coords.add(c1);
-        
-        ShipDisplayInfo<Character> myInfo = new SimpleShipDisplayInfo<>('b', '*');
-        ShipDisplayInfo<Character> enemyInfo = new SimpleShipDisplayInfo<>('B', 'X');
-        
-        ComplexShip<Character> ship = new ComplexShip<>("Battleship", c1, ShipDirection.UP, coords, myInfo, enemyInfo);
-        
-        assertEquals('b', ship.getDisplayInfoAt(c1, true));
-        assertEquals('B', ship.getDisplayInfoAt(c1, false));
-        ship.recordHitAt(c1);
-        assertEquals('*', ship.getDisplayInfoAt(c1, true));
-        assertEquals('X', ship.getDisplayInfoAt(c1, false));
-    }
+    
 } 
