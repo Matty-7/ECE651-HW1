@@ -78,16 +78,22 @@ public class TextPlayer {
   }
 
   public void doPlacementPhase() throws IOException {
-    out.println("Player " + name + ": you are going to place the following ships (which are all");
-    out.println("rectangular). For each ship, type the coordinate of the upper left");
+    out.println("Player " + name + ": you are going to place the following ships.");
+    out.println("For Submarines and Destroyers, type the coordinate of the upper left");
     out.println("side of the ship, followed by either H (for horizontal) or V (for");
     out.println("vertical). For example M4H would place a ship horizontally starting");
-    out.println("at M4 and going to the right. You have");
+    out.println("at M4 and going to the right.");
     out.println("");
-    out.println("2 \"Submarines\" ships that are 1x2");
-    out.println("3 \"Destroyers\" that are 1x3");
-    out.println("3 \"Battleships\" that are 1x4");
-    out.println("2 \"Carriers\" that are 1x6");
+    out.println("For Battleships and Carriers, type the coordinate followed by");
+    out.println("U (up), R (right), D (down), or L (left) for the orientation.");
+    out.println("For example, M4U would place a ship pointing upward from M4.");
+    out.println("");
+    out.println("You have:");
+    out.println("");
+    out.println("2 \"Submarines\" ships that are 1x2 (H or V)");
+    out.println("3 \"Destroyers\" that are 1x3 (H or V)");
+    out.println("3 \"Battleships\" that are special shapes (U, R, D, or L)");
+    out.println("2 \"Carriers\" that are special shapes (U, R, D, or L)");
     out.println("");
     out.print(view.displayMyOwnBoard());
 
@@ -114,6 +120,40 @@ public class TextPlayer {
 
   public void doOnePlacement(String shipName) throws IOException {
     while (true) {
+        // Add detailed ship information
+        out.println("\nNow placing a " + shipName + ":");
+        switch (shipName) {
+            case "Submarine":
+                out.println("This ship is 1x2 in size.");
+                out.println("Valid orientations are H (horizontal) or V (vertical)");
+                out.println("Example: A0H places a submarine at A0 going right to A1");
+                break;
+            case "Destroyer":
+                out.println("This ship is 1x3 in size.");
+                out.println("Valid orientations are H (horizontal) or V (vertical)");
+                out.println("Example: B2V places a destroyer at B2 going down to D2");
+                break;
+            case "Battleship":
+                out.println("This ship has a special shape (Battleship).");
+                out.println("Valid orientations are U (up), R (right), D (down), or L (left).");
+                out.println("For the Up orientation, the ship looks like:");
+                out.println("  *b");
+                out.println("  bbb");
+                out.println("Here, '*' indicates that the top-left cell of the enclosing rectangle is not part of the ship.");
+                break;
+            case "Carrier":
+                out.println("This ship has a special shape (Carrier).");
+                out.println("Valid orientations are U (up), R (right), D (down), or L (left).");
+                out.println("For the Up orientation, the ship looks like:");
+                out.println("  c");
+                out.println("  c");
+                out.println("  cc");
+                out.println("  cc");
+                out.println("   c");
+                out.println("In this diagram, the top-left cell is part of the ship and is shown in lowercase.");
+                break;
+        }
+        
         Placement p = readPlacement("Player " + name + " where do you want to place a " + shipName + "?");
         Ship<Character> s;
         try {
@@ -155,7 +195,7 @@ public class TextPlayer {
    */
   public void playOneTurn(Board<Character> enemyBoard, BoardTextView enemyView) throws IOException {
     String enemyName = name.equals("A") ? "B" : "A";
-    out.println("\nPlayer " + name + "'s turn:");
+    out.println("Player " + name + "'s turn");
     out.println(view.displayMyBoardWithEnemyNextToIt(enemyView, "Your ocean", "Player " + enemyName + "'s ocean"));
     out.println("Where would you like to fire at?");
     
@@ -168,9 +208,9 @@ public class TextPlayer {
         
         Ship<Character> ship = enemyBoard.fireAt(c);
         if (ship != null) {
-            out.println("You hit a " + ship.getName() + "!");
+            out.println("You hit a " + ship.getName());
         } else {
-            out.println("You missed!");
+            out.println("You missed");
         }
         break;
     }
@@ -228,5 +268,9 @@ public class TextPlayer {
    */
   public Board<Character> getBoard() {
     return theBoard;
+  }
+
+  public PrintStream getOut() {
+    return out;
   }
 }

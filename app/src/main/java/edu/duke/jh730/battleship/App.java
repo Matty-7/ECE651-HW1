@@ -22,13 +22,13 @@ public class App {
     while (true) {
       player1.playOneTurn(player2.getBoard(), new BoardTextView(player2.getBoard()));
       if (player2.getBoard().isAllSunk()) {
-        System.out.println("Player A won!");
+        player1.getOut().println("Player A won!");
         break;
       }
       
       player2.playOneTurn(player1.getBoard(), new BoardTextView(player1.getBoard()));
       if (player1.getBoard().isAllSunk()) {
-        System.out.println("Player B won!");
+        player2.getOut().println("Player B won!");
         break;
       }
     }
@@ -38,7 +38,7 @@ public class App {
     Board<Character> b1 = new BattleShipBoard<Character>(10, 20, 'X');
     Board<Character> b2 = new BattleShipBoard<Character>(10, 20, 'X');
     BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-    V1ShipFactory shipFactory = new V1ShipFactory();
+    V2ShipFactory shipFactory = new V2ShipFactory();
     TextPlayer p1 = new TextPlayer("A", b1, input, System.out, shipFactory);
     TextPlayer p2 = new TextPlayer("B", b2, input, System.out, shipFactory);
     App app = new App(p1, p2);
