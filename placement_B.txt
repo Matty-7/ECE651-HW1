@@ -1,0 +1,18 @@
+# Player B's ship placements
+# 2 Submarines (1x2)
+Submarine A0H
+Submarine B0H
+
+# 3 Destroyers (1x3)
+Destroyer C0H
+Destroyer D0H
+Destroyer E5V
+
+# 3 Battleships (special shape)
+Battleship J5L
+Battleship I3R
+Battleship P5U
+
+# 2 Carriers (special shape)
+Carrier N3R
+Carrier B6D

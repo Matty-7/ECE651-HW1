@@ -61,7 +61,16 @@ public class BoardTextView {
   }
 
   public String displayEnemyBoard() {
-    return displayAnyBoard((c) -> toDisplay.whatIsAtForEnemy(c));
+    String board = displayAnyBoard((c) -> toDisplay.whatIsAtForEnemy(c));
+    String[] lines = board.split("\n");
+    StringBuilder sb = new StringBuilder();
+    for (String line : lines) {
+      if (line.trim().startsWith("0")) {
+        sb.append("  ");
+      }
+      sb.append(line).append("\n");
+    }
+    return sb.toString();
   }
 
   /**
@@ -81,7 +90,7 @@ public class BoardTextView {
     
     // Get our board displays (each is assumed to end with a newline).
     String myDisplay = this.displayMyOwnBoard();
-    String enemyDisplay = enemyView.displayMyOwnBoard();
+    String enemyDisplay = enemyView.displayEnemyBoard();
     
     // Split the displays into lines.
     String[] myLines = myDisplay.split("\n");
@@ -100,12 +109,7 @@ public class BoardTextView {
     // and for the row lines use a gap of 16 spaces.
     int numLines = myLines.length;
     for (int i = 0; i < numLines; i++) {
-        String gap;
-        if (i == 0 || i == numLines - 1) {
-            gap = "                    "; // 20 spaces
-        } else {
-            gap = "                "; // 16 spaces
-        }
+        String gap = "                "; // 16 spaces for proper alignment
         sb.append(myLines[i]).append(gap).append(enemyLines[i]).append("\n");
     }
     

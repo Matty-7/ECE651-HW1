@@ -97,6 +97,21 @@ public class TextPlayer {
     out.println("");
     out.print(view.displayMyOwnBoard());
 
+    // Try to read from placement file first
+    String userDir = System.getProperty("user.dir");
+    String placementFile = userDir + "/placement_" + name + ".txt";
+    out.println("Looking for placement file at: " + placementFile);
+    
+    try {
+        if (readPlacementsFromFile(placementFile)) {
+            return;  // Successfully read all placements
+        }
+    } catch (IOException e) {
+        out.println("Error reading file: " + e.getMessage());
+        out.println("Proceeding with manual placement.");
+    }
+
+    // If file reading fails, proceed with manual placement
     // Place 2 Submarines
     for (int i = 0; i < 2; i++) {
         doOnePlacement("Submarine");
@@ -115,6 +130,81 @@ public class TextPlayer {
     // Place 2 Carriers
     for (int i = 0; i < 2; i++) {
         doOnePlacement("Carrier");
+    }
+  }
+
+  /**
+   * Reads ship placements from a file
+   * @param filename the name of the file to read from
+   * @return true if all placements were successful, false otherwise
+   * @throws IOException if there's an error reading the file
+   */
+  private boolean readPlacementsFromFile(String filename) throws IOException {
+    out.println("Attempting to read ship placements from " + filename);
+    try (BufferedReader br = new BufferedReader(new java.io.FileReader(filename))) {
+      String line;
+      int lineNumber = 0;
+      while ((line = br.readLine()) != null) {
+        lineNumber++;
+        // Skip empty lines and comments
+        if (line.trim().isEmpty() || line.startsWith("#")) {
+          continue;
+        }
+        
+        // Each line should be: shipType placement
+        // e.g., "Submarine A0H" or "Battleship B2U"
+        String[] parts = line.trim().split("\\s+");
+        if (parts.length != 2) {
+          out.println("Error on line " + lineNumber + ": Invalid format - " + line);
+          return false;
+        }
+        
+        String shipType = parts[0];
+        String placement = parts[1];
+        
+        Ship<Character> s;
+        try {
+          Placement p = new Placement(placement);
+          switch (shipType) {
+            case "Submarine":
+              s = shipFactory.makeSubmarine(p);
+              break;
+            case "Destroyer":
+              s = shipFactory.makeDestroyer(p);
+              break;
+            case "Battleship":
+              s = shipFactory.makeBattleship(p);
+              break;
+            case "Carrier":
+              s = shipFactory.makeCarrier(p);
+              break;
+            default:
+              out.println("Error on line " + lineNumber + ": Unknown ship type - " + shipType);
+              return false;
+          }
+        } catch (IllegalArgumentException e) {
+          out.println("Error on line " + lineNumber + ": Invalid placement - " + placement);
+          out.println("Reason: " + e.getMessage());
+          return false;
+        }
+        
+        String addShipError = theBoard.tryAddShip(s);
+        if (addShipError != null) {
+          out.println("Error on line " + lineNumber + ": " + addShipError);
+          return false;
+        }
+        out.print(view.displayMyOwnBoard());
+      }
+      out.println("Successfully read all ship placements from file.");
+      return true;
+    } catch (java.io.FileNotFoundException e) {
+      out.println("Placement file not found: " + filename);
+      out.println("Proceeding with manual placement.");
+      return false;
+    } catch (IOException e) {
+      out.println("Error reading placement file: " + e.getMessage());
+      out.println("Proceeding with manual placement.");
+      return false;
     }
   }
 
