@@ -216,11 +216,17 @@ public class BattleShipBoard<T> implements Board<T> {
       return placementError;
     }
 
+    // Transfer hits to the new ship and update hit tracking
     for (Coordinate oldC : originalCoords) {
+      // Remove old coordinates from historicalHits
+      historicalHits.remove(oldC);
+      // Add old coordinates to enemyMisses if they were hit
       if (originalShip.wasHitAt(oldC)) {
+        enemyMisses.add(oldC);
         Coordinate relativeC = findRelativeCoordinate(oldC, originalShip, movedShip);
         if (relativeC != null) {
           movedShip.recordHitAt(relativeC);
+          historicalHits.add(relativeC);
         }
       }
     }

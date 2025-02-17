@@ -51,7 +51,9 @@ public class BattleShipBoardTest {
     checkWhatIsAtBoard(b, expected);
 
     // Try to add ship out of bounds
-    Ship<Character> s3 = new RectangleShip<Character>(new Coordinate(-1, 0), 'b', '*');
+    Ship<Character> s3 = new RectangleShip<Character>("Test", new Coordinate(-1, 0), 1, 1,
+        new SimpleShipDisplayInfo<Character>('b', '*'),
+        new SimpleShipDisplayInfo<Character>('b', 'b'));
     assertEquals("That placement is invalid: the ship goes off the top of the board.", b.tryAddShip(s3));
     checkWhatIsAtBoard(b, expected);
   }
@@ -89,7 +91,6 @@ public class BattleShipBoardTest {
     Coordinate c2 = new Coordinate(0, 0);
     assertNull(b.fireAt(c2));
   }
-
 
   @Test
   public void test_is_all_sunk() {
@@ -131,12 +132,60 @@ public class BattleShipBoardTest {
 
     // Repeat shot should still hit the ship
     hitShip = b.fireAt(c1);
-    assertNotNull(hitShip);  // 重复攻击应该仍然返回船只对象
-    assertTrue(hitShip.wasHitAt(c1));  // 确认船只被击中
+    assertNotNull(hitShip);
+    assertTrue(hitShip.wasHitAt(c1));
     
     // Shot at empty space
     Coordinate c2 = new Coordinate(0, 0);
-    assertNull(b.fireAt(c2));  // 空位置应该返回 null
-    assertTrue(b.wasAlreadyShot(c2));  // 但仍然记录为已攻击
+    assertNull(b.fireAt(c2));
+    assertTrue(b.wasAlreadyShot(c2));
   }
+
+  @Test
+  public void test_moveShip() {
+    BattleShipBoard<Character> b = new BattleShipBoard<Character>(5, 5, 'X');
+    
+    // Add a 2x1 rectangle ship at (1,1)
+    Ship<Character> s = new RectangleShip<Character>("Destroyer",
+        new Coordinate(1, 1), 2, 1,
+        new SimpleShipDisplayInfo<Character>('d', '*'),
+        new SimpleShipDisplayInfo<Character>('d', 'd'));
+    assertNull(b.tryAddShip(s));
+
+    // Fire at (1,1) => partial hit
+    b.fireAt(new Coordinate(1, 1));
+    assertTrue(s.wasHitAt(new Coordinate(1, 1)));
+    assertFalse(s.wasHitAt(new Coordinate(1, 2)));
+
+    // Move the ship to (2,0) horizontally
+    Placement newP = new Placement(new Coordinate(2, 0), 'H');
+    String moveErr = b.moveShip(s, newP);
+    assertNull(moveErr);
+
+    // Check new position
+    Ship<Character> newShip = b.getShipAt(new Coordinate(2, 0));
+    assertNotNull(newShip);
+    assertTrue(newShip.wasHitAt(new Coordinate(2, 0)));
+    assertFalse(newShip.wasHitAt(new Coordinate(2, 1)));
+
+    // Check old position is cleared
+    assertNull(b.getShipAt(new Coordinate(1, 1)));
+    assertNull(b.getShipAt(new Coordinate(1, 2)));
+
+    // Try invalid move
+    moveErr = b.moveShip(newShip, new Placement(new Coordinate(4, 4), 'H'));
+    assertNotNull(moveErr);
+  }
+
+
+  @Test
+  public void test_moveShip_invalid_ship() {
+    BattleShipBoard<Character> b = new BattleShipBoard<Character>(5, 5, 'X');
+    Ship<Character> s = new RectangleShip<Character>("Test", new Coordinate(0, 0), 1, 1, 't', '*');
+    
+    // Try to move a ship that's not on the board
+    String err = b.moveShip(s, new Placement(new Coordinate(1, 1), 'H'));
+    assertEquals("That ship is not on this board!", err);
+  }
+
 } 
