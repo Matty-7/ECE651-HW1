@@ -9,12 +9,14 @@ public class V2ShipFactory implements AbstractShipFactory<Character> {
         }
         int width = where.getOrientation() == 'V' ? w : h;
         int height = where.getOrientation() == 'V' ? h : w;
-        return new RectangleShip<Character>(name, where.getWhere(), width, height, letter, '*');
+        ShipDisplayInfo<Character> myDisplayInfo = new SimpleShipDisplayInfo<>(letter, '*');
+        ShipDisplayInfo<Character> enemyDisplayInfo = new SimpleShipDisplayInfo<>(letter, '*', true);
+        return new RectangleShip<Character>(name, where.getWhere(), width, height, myDisplayInfo, enemyDisplayInfo);
     }
 
     protected Ship<Character> createComplexShip(String name, Placement where, char letter, HashSet<Coordinate> coordinates) {
         ShipDisplayInfo<Character> myDisplayInfo = new SimpleShipDisplayInfo<>(letter, '*');
-        ShipDisplayInfo<Character> enemyDisplayInfo = new SimpleShipDisplayInfo<>(letter, '*');
+        ShipDisplayInfo<Character> enemyDisplayInfo = new SimpleShipDisplayInfo<>(letter, '*', true);
         return new ComplexShip<>(name, where.getWhere(), ShipDirection.fromChar(where.getOrientation()), coordinates, myDisplayInfo, enemyDisplayInfo);
     }
 
