@@ -4,6 +4,8 @@ import java.util.HashSet;
 
 public class RectangleShip<T> extends BasicShip<T> {
   private final String name;
+  private final int width;
+  private final int height;
 
   /**
    * Generate the set of coordinates for a rectangle starting at upperLeft
@@ -29,6 +31,8 @@ public class RectangleShip<T> extends BasicShip<T> {
                        ShipDisplayInfo<T> myDisplayInfo, ShipDisplayInfo<T> enemyDisplayInfo) {
     super(makeCoords(upperLeft, width, height), myDisplayInfo, enemyDisplayInfo);
     this.name = name;
+    this.width = width;
+    this.height = height;
   }
 
   public RectangleShip(String name, Coordinate upperLeft, int width, int height, T data, T onHit) {
@@ -44,5 +48,13 @@ public class RectangleShip<T> extends BasicShip<T> {
   @Override
   public String getName() {
     return name;
+  }
+
+  public int getWidth() {
+    return width;
+  }
+
+  public int getHeight() {
+    return height;
   }
 } 

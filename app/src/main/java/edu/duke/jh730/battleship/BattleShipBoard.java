@@ -11,6 +11,7 @@ public class BattleShipBoard<T> implements Board<T> {
   private final HashSet<Coordinate> enemyMisses;
   private final T missInfo;
   private final HashSet<Coordinate> allShots;
+  private final HashSet<Coordinate> historicalHits;
 
   /**
    * Constructor for BattleShipBoard
@@ -33,6 +34,7 @@ public class BattleShipBoard<T> implements Board<T> {
     this.placementChecker = placementChecker;
     this.enemyMisses = new HashSet<Coordinate>();
     this.allShots = new HashSet<Coordinate>();
+    this.historicalHits = new HashSet<Coordinate>();
     this.missInfo = missInfo;
   }
 
@@ -73,41 +75,45 @@ public class BattleShipBoard<T> implements Board<T> {
 
   @Override
   public T whatIsAtForEnemy(Coordinate where) {
+    // First check if any ship at this location is sunk
     for (Ship<T> s: myShips) {
-      if (s.occupiesCoordinates(where)) {
-        if (s.isSunk()) {
-          return s.getDisplayInfoAt(where, false);
-        } else if (s.wasHitAt(where)) {
-          return (T)Character.valueOf('*');
-        }
-        return null;
+      if (s.occupiesCoordinates(where) && s.isSunk()) {
+        return s.getDisplayInfoAt(where, false);
       }
     }
+    
+    // Then check for historical hits
+    if (historicalHits.contains(where)) {
+      return (T)Character.valueOf('*');
+    }
+    
+    // Then check for misses
     if (enemyMisses.contains(where)) {
       return missInfo;
     }
+    
+    // Finally, hide any non-sunk ships
     return null;
   }
 
   @Override
   public Ship<T> fireAt(Coordinate c) {
-    if (allShots.contains(c)) {
-        return null;
+    Ship<T> hitShip = null;
+    
+    for (Ship<T> s : myShips) {
+      if (s.occupiesCoordinates(c)) {
+        s.recordHitAt(c);
+        hitShip = s;
+        historicalHits.add(c);
+        break;
+      }
     }
     
-    Ship<T> hitShip = null;
-    for (Ship<T> s : myShips) {
-        if (s.occupiesCoordinates(c)) {
-            s.recordHitAt(c);
-            hitShip = s;
-            break;
-        }
+    if (hitShip == null) {
+      enemyMisses.add(c);
     }
     
     allShots.add(c);
-    if (hitShip == null) {
-        enemyMisses.add(c);
-    }
     return hitShip;
   }
 
@@ -138,6 +144,114 @@ public class BattleShipBoard<T> implements Board<T> {
 
   @Override
   public boolean wasAlreadyShot(Coordinate where) {
-    return allShots.contains(where);
+    return historicalHits.contains(where) || enemyMisses.contains(where);
+  }
+
+  @Override
+  public Ship<T> getShipAt(Coordinate where) {
+    for (Ship<T> s : myShips) {
+      if (s.occupiesCoordinates(where)) {
+        return s;
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public Iterable<Ship<T>> getShips() {
+    return myShips;
+  }
+
+  @Override
+  public String moveShip(Ship<T> toMove, Placement newP) {
+    if (!myShips.contains(toMove)) {
+      return "That ship is not on this board!";
+    }
+
+    Ship<T> originalShip = toMove;
+    HashSet<Coordinate> originalCoords = new HashSet<>();
+    for (Coordinate c : toMove.getCoordinates()) {
+      originalCoords.add(c);
+    }
+
+    myShips.remove(toMove);
+
+    Ship<T> movedShip = null;
+    try {
+      if (toMove instanceof RectangleShip) {
+        RectangleShip<T> rs = (RectangleShip<T>)toMove;
+        int width = rs.getWidth();
+        int height = rs.getHeight();
+        if ((newP.getOrientation() == 'V' && rs.getWidth() > rs.getHeight()) ||
+            (newP.getOrientation() == 'H' && rs.getHeight() > rs.getWidth())) {
+          int temp = width;
+          width = height;
+          height = temp;
+        }
+        movedShip = new RectangleShip<>(rs.getName(), newP.getWhere(), 
+                                       width, height,
+                                       rs.getMyDisplayInfo(), rs.getEnemyDisplayInfo());
+      } else if (toMove instanceof ComplexShip) {
+        ComplexShip<T> cs = (ComplexShip<T>)toMove;
+        HashSet<Coordinate> newCoords = new HashSet<>();
+        for (Coordinate c : cs.getCoordinates()) {
+          int relRow = c.getRow() - originalCoords.iterator().next().getRow();
+          int relCol = c.getColumn() - originalCoords.iterator().next().getColumn();
+          newCoords.add(new Coordinate(newP.getWhere().getRow() + relRow,
+                                     newP.getWhere().getColumn() + relCol));
+        }
+        movedShip = new ComplexShip<T>(cs.getName(), newP.getWhere(),
+                                     ShipDirection.fromChar(newP.getOrientation()),
+                                     newCoords, cs.getMyDisplayInfo(),
+                                     cs.getEnemyDisplayInfo());
+      }
+    } catch (IllegalArgumentException e) {
+      myShips.add(originalShip);
+      return e.getMessage();
+    }
+
+    String placementError = placementChecker.checkPlacement(movedShip, this);
+    if (placementError != null) {
+      myShips.add(originalShip);
+      return placementError;
+    }
+
+    for (Coordinate oldC : originalCoords) {
+      if (originalShip.wasHitAt(oldC)) {
+        Coordinate relativeC = findRelativeCoordinate(oldC, originalShip, movedShip);
+        if (relativeC != null) {
+          movedShip.recordHitAt(relativeC);
+        }
+      }
+    }
+
+    myShips.add(movedShip);
+    return null;
+  }
+
+  private Coordinate findRelativeCoordinate(Coordinate oldC, Ship<T> oldShip, Ship<T> newShip) {
+    Coordinate oldAnchor = null;
+    Coordinate newAnchor = null;
+    for (Coordinate c : oldShip.getCoordinates()) {
+      if (oldAnchor == null || (c.getRow() <= oldAnchor.getRow() && c.getColumn() <= oldAnchor.getColumn())) {
+        oldAnchor = c;
+      }
+    }
+    for (Coordinate c : newShip.getCoordinates()) {
+      if (newAnchor == null || (c.getRow() <= newAnchor.getRow() && c.getColumn() <= newAnchor.getColumn())) {
+        newAnchor = c;
+      }
+    }
+
+    int relativeRow = oldC.getRow() - oldAnchor.getRow();
+    int relativeCol = oldC.getColumn() - oldAnchor.getColumn();
+
+    for (Coordinate newC : newShip.getCoordinates()) {
+      if (newC.getRow() - newAnchor.getRow() == relativeRow &&
+          newC.getColumn() - newAnchor.getColumn() == relativeCol) {
+        return newC;
+      }
+    }
+    return null;
   }
 } 

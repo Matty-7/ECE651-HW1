@@ -51,4 +51,14 @@ public interface Ship<T> {
    * @return An Iterable with the coordinates that this Ship occupies
    */
   public Iterable<Coordinate> getCoordinates();
+
+  /**
+   * Get the display info for this ship when viewed by self
+   */
+  public ShipDisplayInfo<T> getMyDisplayInfo();
+  
+  /**
+   * Get the display info for this ship when viewed by enemy
+   */
+  public ShipDisplayInfo<T> getEnemyDisplayInfo();
 } 

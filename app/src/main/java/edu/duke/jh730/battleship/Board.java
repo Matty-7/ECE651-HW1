@@ -30,4 +30,25 @@ public interface Board<T> {
    * @return true if this coordinate has already been fired at
    */
   public boolean wasAlreadyShot(Coordinate where);
+
+  /**
+   * Get the ship at the specified coordinate
+   * @param where is the Coordinate to check for a ship
+   * @return the Ship at the specified coordinate, or null if no ship is present
+   */
+  public Ship<T> getShipAt(Coordinate where);
+
+  /**
+   * Get all ships on this board
+   * @return Iterable of all ships
+   */
+  public Iterable<Ship<T>> getShips();
+  
+  /**
+   * Move a ship to a new position
+   * @param toMove the ship to move
+   * @param newP the new placement for the ship
+   * @return null if successful, or a string describing why the move failed
+   */
+  public String moveShip(Ship<T> toMove, Placement newP);
 } 

@@ -58,6 +58,16 @@ public abstract class BasicShip<T> implements Ship<T> {
     return myPieces.keySet();
   }
 
+  @Override
+  public ShipDisplayInfo<T> getMyDisplayInfo() {
+    return myDisplayInfo;
+  }
+
+  @Override
+  public ShipDisplayInfo<T> getEnemyDisplayInfo() {
+    return enemyDisplayInfo;
+  }
+
   protected void checkCoordinateInThisShip(Coordinate c) {
     if (!myPieces.containsKey(c)) {
       throw new IllegalArgumentException("Coordinate " + c + " is not in ship.");

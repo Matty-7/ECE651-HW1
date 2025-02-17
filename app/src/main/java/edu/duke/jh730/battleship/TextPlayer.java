@@ -12,6 +12,8 @@ public class TextPlayer {
   private final PrintStream out;
   private final AbstractShipFactory<Character> shipFactory;
   private final BoardTextView view;
+  private int moveActionsLeft;
+  private int sonarActionsLeft;
 
   public TextPlayer(String name, Board<Character> theBoard, BufferedReader input, PrintStream out,
                     AbstractShipFactory<Character> shipFactory) {
@@ -21,6 +23,8 @@ public class TextPlayer {
     this.out = out;
     this.shipFactory = shipFactory;
     this.view = new BoardTextView(this.theBoard);
+    this.moveActionsLeft = 3;
+    this.sonarActionsLeft = 3;
   }
 
   /**
@@ -287,25 +291,129 @@ public class TextPlayer {
     String enemyName = name.equals("A") ? "B" : "A";
     out.println("Player " + name + "'s turn");
     out.println(view.displayMyBoardWithEnemyNextToIt(enemyView, "Your ocean", "Player " + enemyName + "'s ocean"));
-    out.println("Where would you like to fire at?");
     
+    // Display available actions
+    out.println("\nPossible actions for Player " + name + ":\n");
+    out.println(" F Fire at a square");
+    if (moveActionsLeft > 0) {
+      out.println(" M Move a ship to another square (" + moveActionsLeft + " remaining)");
+    }
+    if (sonarActionsLeft > 0) {
+      out.println(" S Sonar scan (" + sonarActionsLeft + " remaining)");
+    }
+    out.println("\nPlayer " + name + ", what would you like to do?");
+
     while (true) {
-        Coordinate c = readCoordinate("Enter coordinate: ");
-        if (enemyBoard.wasAlreadyShot(c)) {
-            out.println("You already fired at this coordinate. Please choose another location.");
-            continue;
-        }
-        
-        Ship<Character> ship = enemyBoard.fireAt(c);
-        if (ship != null) {
-            out.println("You hit a " + ship.getName());
-            if (ship.isSunk()) {
-                out.println("Player " + enemyName + "'s " + ship.getName() + " has been destroyed!");
+      String action = input.readLine().toUpperCase().trim();
+      switch (action) {
+        case "F":
+          doFireAction(enemyBoard);
+          return;
+        case "M":
+          if (moveActionsLeft > 0) {
+            if (doMoveShip()) {
+              moveActionsLeft--;
+              return;
             }
-        } else {
-            out.println("You missed");
+          } else {
+            out.println("No more move actions remaining!");
+          }
+          break;
+        case "S":
+          if (sonarActionsLeft > 0) {
+            if (doSonarScan(enemyBoard)) {
+              sonarActionsLeft--;
+              return;
+            }
+          } else {
+            out.println("No more sonar actions remaining!");
+          }
+          break;
+        default:
+          out.println("Invalid action! Please enter F, M, or S.");
+      }
+    }
+  }
+
+  private void doFireAction(Board<Character> enemyBoard) throws IOException {
+    out.println("Where would you like to fire at?");
+    while (true) {
+      Coordinate c = readCoordinate("Enter coordinate: ");
+      if (enemyBoard.wasAlreadyShot(c)) {
+        out.println("You have already fired at " + (char)('A' + c.getRow()) + c.getColumn() + "!");
+        out.println("Please choose a different coordinate.");
+        continue;
+      }
+      
+      Ship<Character> ship = enemyBoard.fireAt(c);
+      if (ship != null) {
+        out.println("You hit a " + ship.getName() + "!");
+        if (ship.isSunk()) {
+          out.println("You have destroyed Player " + (name.equals("A") ? "B" : "A") + "'s " + ship.getName() + "!");
         }
+      } else {
+        out.println("You missed!");
+      }
+      break;
+    }
+  }
+
+  private boolean doMoveShip() throws IOException {
+    out.println("Which ship do you want to move?");
+    out.println("Enter a coordinate that is part of your ship:");
+    
+    Coordinate shipCoord = readCoordinate("Enter coordinate: ");
+    Ship<Character> shipToMove = null;
+    
+    // Find the ship at the given coordinate
+    for (Ship<Character> s : theBoard.getShips()) {
+      if (s.occupiesCoordinates(shipCoord)) {
+        shipToMove = s;
         break;
+      }
+    }
+    
+    if (shipToMove == null) {
+      out.println("No ship found at that coordinate!");
+      return false;
+    }
+    
+    out.println("Enter the new placement for your " + shipToMove.getName());
+    if (shipToMove instanceof RectangleShip) {
+      out.println("The format should be like 'A0H' or 'B1V'");
+    } else {
+      out.println("The format should be like 'A0U', 'B1R', 'C2D', or 'D3L'");
+      if (shipToMove.getName().equals("Battleship")) {
+        out.println("For the Up orientation, the ship looks like:");
+        out.println("  *b");
+        out.println("  bbb");
+      } else if (shipToMove.getName().equals("Carrier")) {
+        out.println("For the Up orientation, the ship looks like:");
+        out.println("  c");
+        out.println("  c");
+        out.println("  cc");
+        out.println("  cc");
+        out.println("   c");
+      }
+    }
+    
+    try {
+      Placement newPlacement = readPlacement("Enter new placement: ");
+      
+      // Try to move the ship
+      String moveError = theBoard.moveShip(shipToMove, newPlacement);
+      if (moveError != null) {
+        out.println("Invalid move: " + moveError);
+        return false;
+      }
+      
+      out.println("Successfully moved " + shipToMove.getName());
+      out.print(view.displayMyOwnBoard());
+      return true;
+      
+    } catch (IllegalArgumentException e) {
+      out.println("Invalid placement format!");
+      return false;
     }
   }
 
@@ -365,5 +473,61 @@ public class TextPlayer {
 
   public PrintStream getOut() {
     return out;
+  }
+
+  private boolean doSonarScan(Board<Character> enemyBoard) throws IOException {
+    out.println("Where would you like to scan?");
+    Coordinate center = readCoordinate("Enter coordinate for center of scan: ");
+    
+    // Check if the coordinate is valid for a sonar scan (not too close to edges)
+    if (center.getRow() < 3 || center.getRow() >= theBoard.getHeight() - 3 ||
+        center.getColumn() < 3 || center.getColumn() >= theBoard.getWidth() - 3) {
+      out.println("Invalid scan location! The scan center must be at least 3 squares from the board edge.");
+      return false;
+    }
+
+    // Initialize counters for different ship types
+    int submarines = 0;
+    int destroyers = 0;
+    int battleships = 0;
+    int carriers = 0;
+
+    // Scan a diamond shape with radius 3
+    // For each row offset from the center
+    for (int rowOffset = -3; rowOffset <= 3; rowOffset++) {
+      // Calculate the column range for this row
+      int colRange = 3 - Math.abs(rowOffset);
+      // For each column in the range for this row
+      for (int colOffset = -colRange; colOffset <= colRange; colOffset++) {
+        Coordinate scanCoord = new Coordinate(center.getRow() + rowOffset, 
+                                            center.getColumn() + colOffset);
+        Ship<Character> ship = enemyBoard.getShipAt(scanCoord);
+        if (ship != null) {
+          switch (ship.getName()) {
+            case "Submarine":
+              submarines++;
+              break;
+            case "Destroyer":
+              destroyers++;
+              break;
+            case "Battleship":
+              battleships++;
+              break;
+            case "Carrier":
+              carriers++;
+              break;
+          }
+        }
+      }
+    }
+
+    // Display scan results
+    out.println("\nSonar scan report at " + (char)('A' + center.getRow()) + center.getColumn() + ":");
+    out.println("Submarines occupy " + submarines + " square(s)");
+    out.println("Destroyers occupy " + destroyers + " square(s)");
+    out.println("Battleships occupy " + battleships + " square(s)");
+    out.println("Carriers occupy " + carriers + " square(s)");
+
+    return true;
   }
 }
