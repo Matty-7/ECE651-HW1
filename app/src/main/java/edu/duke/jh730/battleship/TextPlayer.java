@@ -328,7 +328,11 @@ public class TextPlayer {
     out.println("\nPlayer " + name + ", what would you like to do?");
 
     while (true) {
-      String action = input.readLine().toUpperCase().trim();
+      String input_line = input.readLine();
+      if (input_line == null) {
+        throw new EOFException("No more input");
+      }
+      String action = input_line.toUpperCase().trim();
       switch (action) {
         case "F":
           doFireAction(enemyBoard);

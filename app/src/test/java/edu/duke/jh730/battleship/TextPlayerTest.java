@@ -308,7 +308,7 @@ public class TextPlayerTest {
   void test_sonarScan_invalid_location() throws IOException {
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     Board<Character> board = new BattleShipBoard<>(10, 20, 'X');
-    String inputData = "S\nA0\n"; // Invalid location (too close to edge)
+    String inputData = "S\nA0\nF\nA0\n"; // After invalid sonar scan, do a fire action
     TextPlayer player = createTextPlayer("A", inputData, bytes, board);
     
     Board<Character> enemyBoard = new BattleShipBoard<>(10, 20, 'X');
@@ -327,7 +327,7 @@ public class TextPlayerTest {
     V2ShipFactory factory = new V2ShipFactory();
     board.tryAddShip(factory.makeSubmarine(new Placement("A0H")));
     
-    String inputData = "M\nA0\nZ0H\n"; // Invalid new location
+    String inputData = "M\nA0\nZ0H\nF\nA0\n"; // After invalid move, do a fire action
     TextPlayer player = createTextPlayer("A", inputData, bytes, board);
     
     Board<Character> enemyBoard = new BattleShipBoard<>(10, 20, 'X');

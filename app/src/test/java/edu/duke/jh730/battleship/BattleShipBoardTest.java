@@ -129,16 +129,14 @@ public class BattleShipBoardTest {
     assertSame(s1, hitShip);
     assertTrue(b.wasAlreadyShot(c1));
 
-    // Repeat shot
+    // Repeat shot should still hit the ship
     hitShip = b.fireAt(c1);
-    assertNull(hitShip);  // 表示这是一个无效的重复攻击
+    assertNotNull(hitShip);  // 重复攻击应该仍然返回船只对象
+    assertTrue(hitShip.wasHitAt(c1));  // 确认船只被击中
     
     // Shot at empty space
     Coordinate c2 = new Coordinate(0, 0);
-    assertNull(b.fireAt(c2));
-    assertTrue(b.wasAlreadyShot(c2));
-    
-    // Repeat shot at empty space
-    assertNull(b.fireAt(c2));
+    assertNull(b.fireAt(c2));  // 空位置应该返回 null
+    assertTrue(b.wasAlreadyShot(c2));  // 但仍然记录为已攻击
   }
 } 
