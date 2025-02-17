@@ -14,9 +14,12 @@ public class TextPlayer {
   private final BoardTextView view;
   private int moveActionsLeft;
   private int sonarActionsLeft;
+  private final boolean isComputer;
+  private int nextComputerShotRow;
+  private int nextComputerShotCol;
 
   public TextPlayer(String name, Board<Character> theBoard, BufferedReader input, PrintStream out,
-                    AbstractShipFactory<Character> shipFactory) {
+                    AbstractShipFactory<Character> shipFactory, boolean isComputer) {
     this.name = name;
     this.theBoard = theBoard;
     this.input = input;
@@ -25,6 +28,14 @@ public class TextPlayer {
     this.view = new BoardTextView(this.theBoard);
     this.moveActionsLeft = 3;
     this.sonarActionsLeft = 3;
+    this.isComputer = isComputer;
+    this.nextComputerShotRow = 0;
+    this.nextComputerShotCol = 0;
+  }
+
+  public TextPlayer(String name, Board<Character> theBoard, BufferedReader input, PrintStream out,
+                    AbstractShipFactory<Character> shipFactory) {
+    this(name, theBoard, input, out, shipFactory, false);
   }
 
   /**
@@ -82,6 +93,10 @@ public class TextPlayer {
   }
 
   public void doPlacementPhase() throws IOException {
+    if (isComputer) {
+      doComputerPlacement();
+      return;
+    }
     out.println("Player " + name + ": you are going to place the following ships.");
     out.println("For Submarines and Destroyers, type the coordinate of the upper left");
     out.println("side of the ship, followed by either H (for horizontal) or V (for");
@@ -289,6 +304,15 @@ public class TextPlayer {
    */
   public void playOneTurn(Board<Character> enemyBoard, BoardTextView enemyView) throws IOException {
     String enemyName = name.equals("A") ? "B" : "A";
+    
+    if (isComputer) {
+      // Computer's turn
+      out.println("Player " + name + "'s turn");
+      doComputerTurn(enemyBoard);
+      return;
+    }
+    
+    // Human player's turn
     out.println("Player " + name + "'s turn");
     out.println(view.displayMyBoardWithEnemyNextToIt(enemyView, "Your ocean", "Player " + enemyName + "'s ocean"));
     
@@ -332,6 +356,53 @@ public class TextPlayer {
         default:
           out.println("Invalid action! Please enter F, M, or S.");
       }
+    }
+  }
+
+  private void doComputerTurn(Board<Character> enemyBoard) {
+    // Simple random chance to use special action (10%)
+    if (Math.random() < 0.1) {
+      if (sonarActionsLeft > 0 || moveActionsLeft > 0) {
+        out.println("Player " + name + " used a special action");
+        if (sonarActionsLeft > 0) {
+          sonarActionsLeft--;
+        } else if (moveActionsLeft > 0) {
+          moveActionsLeft--;
+        }
+        return;
+      }
+    }
+
+    // Regular fire action
+    Coordinate c = new Coordinate(nextComputerShotRow, nextComputerShotCol);
+    
+    // Update next shot position
+    nextComputerShotCol++;
+    if (nextComputerShotCol >= theBoard.getWidth()) {
+      nextComputerShotCol = 0;
+      nextComputerShotRow++;
+      if (nextComputerShotRow >= theBoard.getHeight()) {
+        // If we've covered the whole board, start over
+        nextComputerShotRow = 0;
+      }
+    }
+    
+    // Skip if already shot here
+    if (enemyBoard.wasAlreadyShot(c)) {
+      doComputerTurn(enemyBoard);
+      return;
+    }
+    
+    Ship<Character> ship = enemyBoard.fireAt(c);
+    if (ship != null) {
+      out.println("Player " + name + " hit a " + ship.getName() + " at " + 
+                  (char)('A' + c.getRow()) + c.getColumn() + "!");
+      if (ship.isSunk()) {
+        out.println("Player " + name + " has destroyed Player " + 
+                   (name.equals("A") ? "B" : "A") + "'s " + ship.getName() + "!");
+      }
+    } else {
+      out.println("Player " + name + " missed!");
     }
   }
 
@@ -476,6 +547,11 @@ public class TextPlayer {
   }
 
   private boolean doSonarScan(Board<Character> enemyBoard) throws IOException {
+    if (sonarActionsLeft <= 0) {
+      out.println("No more sonar scans remaining!");
+      return false;
+    }
+
     out.println("Where would you like to scan?");
     Coordinate center = readCoordinate("Enter coordinate for center of scan: ");
     
@@ -492,15 +568,19 @@ public class TextPlayer {
     int battleships = 0;
     int carriers = 0;
 
-    // Scan a diamond shape with radius 3
-    // For each row offset from the center
+    // Scan in a diamond shape
     for (int rowOffset = -3; rowOffset <= 3; rowOffset++) {
-      // Calculate the column range for this row
+      // For each row offset, calculate the allowed column range
       int colRange = 3 - Math.abs(rowOffset);
-      // For each column in the range for this row
       for (int colOffset = -colRange; colOffset <= colRange; colOffset++) {
         Coordinate scanCoord = new Coordinate(center.getRow() + rowOffset, 
                                             center.getColumn() + colOffset);
+        // Skip if coordinate is outside board bounds
+        if (scanCoord.getRow() < 0 || scanCoord.getRow() >= theBoard.getHeight() ||
+            scanCoord.getColumn() < 0 || scanCoord.getColumn() >= theBoard.getWidth()) {
+          continue;
+        }
+        
         Ship<Character> ship = enemyBoard.getShipAt(scanCoord);
         if (ship != null) {
           switch (ship.getName()) {
@@ -521,13 +601,113 @@ public class TextPlayer {
       }
     }
 
-    // Display scan results
-    out.println("\nSonar scan report at " + (char)('A' + center.getRow()) + center.getColumn() + ":");
-    out.println("Submarines occupy " + submarines + " square(s)");
-    out.println("Destroyers occupy " + destroyers + " square(s)");
-    out.println("Battleships occupy " + battleships + " square(s)");
-    out.println("Carriers occupy " + carriers + " square(s)");
+    // Display scan results in the required format
+    out.println("Sonar scan report at " + (char)('A' + center.getRow()) + center.getColumn() + ":");
+    out.println("Submarines occupy " + submarines + " squares");
+    out.println("Destroyers occupy " + destroyers + " squares");
+    out.println("Battleships occupy " + battleships + " squares");
+    out.println("Carriers occupy " + carriers + " squares");
 
     return true;
+  }
+
+  private void doComputerPlacement() {
+    // Predefined placements for computer
+    String[] placements = {
+      // 2 Submarines
+      "Submarine A0H",
+      "Submarine B0H",
+      // 3 Destroyers
+      "Destroyer C0H",
+      "Destroyer D0H",
+      "Destroyer E0H",
+      // 3 Battleships
+      "Battleship F0U",
+      "Battleship G0U",
+      "Battleship H0U",
+      // 2 Carriers
+      "Carrier I0U",
+      "Carrier J0U"
+    };
+
+    for (String placement : placements) {
+      String[] parts = placement.split(" ");
+      String shipType = parts[0];
+      String placementStr = parts[1];
+      
+      try {
+        Placement p = new Placement(placementStr);
+        Ship<Character> s = null;
+        
+        // Create ship based on type
+        switch (shipType) {
+          case "Submarine":
+            s = shipFactory.makeSubmarine(p);
+            break;
+          case "Destroyer":
+            s = shipFactory.makeDestroyer(p);
+            break;
+          case "Battleship":
+            s = shipFactory.makeBattleship(p);
+            break;
+          case "Carrier":
+            s = shipFactory.makeCarrier(p);
+            break;
+        }
+        
+        // Try to add ship, if fails, try next column
+        String error = theBoard.tryAddShip(s);
+        if (error != null) {
+          int col = p.getWhere().getColumn();
+          int row = p.getWhere().getRow();
+          
+          // Try moving right until we find a valid position or reach board edge
+          while (error != null && col < theBoard.getWidth() - 4) {
+            col++;
+            Placement newP = new Placement(new Coordinate(row, col), p.getOrientation());
+            switch (shipType) {
+              case "Submarine":
+                s = shipFactory.makeSubmarine(newP);
+                break;
+              case "Destroyer":
+                s = shipFactory.makeDestroyer(newP);
+                break;
+              case "Battleship":
+                s = shipFactory.makeBattleship(newP);
+                break;
+              case "Carrier":
+                s = shipFactory.makeCarrier(newP);
+                break;
+            }
+            error = theBoard.tryAddShip(s);
+          }
+          
+          // If still can't place, try next row
+          if (error != null && row < theBoard.getHeight() - 4) {
+            row++;
+            col = 0;
+            Placement newP = new Placement(new Coordinate(row, col), p.getOrientation());
+            switch (shipType) {
+              case "Submarine":
+                s = shipFactory.makeSubmarine(newP);
+                break;
+              case "Destroyer":
+                s = shipFactory.makeDestroyer(newP);
+                break;
+              case "Battleship":
+                s = shipFactory.makeBattleship(newP);
+                break;
+              case "Carrier":
+                s = shipFactory.makeCarrier(newP);
+                break;
+            }
+            error = theBoard.tryAddShip(s);
+          }
+        }
+      } catch (IllegalArgumentException e) {
+        // Skip if placement fails
+        continue;
+      }
+    }
   }
 }

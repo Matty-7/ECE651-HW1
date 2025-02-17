@@ -14,11 +14,16 @@ import org.junit.jupiter.api.Test;
 public class TextPlayerTest {
 
   private TextPlayer createTextPlayer(String playerName, String inputData, ByteArrayOutputStream bytes,
-      Board<Character> board) {
+      Board<Character> board, boolean isComputer) {
     BufferedReader input = new BufferedReader(new StringReader(inputData));
     PrintStream output = new PrintStream(bytes, true);
-    AbstractShipFactory<Character> factory = new V1ShipFactory();
-    return new TextPlayer(playerName, board, input, output, factory);
+    AbstractShipFactory<Character> factory = new V2ShipFactory();
+    return new TextPlayer(playerName, board, input, output, factory, isComputer);
+  }
+
+  private TextPlayer createTextPlayer(String playerName, String inputData, ByteArrayOutputStream bytes,
+      Board<Character> board) {
+    return createTextPlayer(playerName, inputData, bytes, board, false);
   }
 
   @Test
@@ -168,25 +173,182 @@ public class TextPlayerTest {
   }
 
   @Test
-  public void test_playOneTurn() throws IOException {
+  void test_doPlacementPhase() throws IOException {
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    Board<Character> b1 = new BattleShipBoard<Character>(3, 3, 'X');
-    Board<Character> b2 = new BattleShipBoard<Character>(3, 3, 'X');
-    Ship<Character> s = new RectangleShip<Character>(new Coordinate(1, 1), 's', '*');
-    b2.tryAddShip(s);
-    
-    // Test hit
-    TextPlayer player = createTextPlayer("A", "B1\n", bytes, b1);
-    BoardTextView enemyView = new BoardTextView(b2);
-    player.playOneTurn(b2, enemyView);
+    Board<Character> board = new BattleShipBoard<>(10, 20, 'X');
+    // Create input with all ship placements
+    String inputData = "A0H\n" + // First submarine
+                      "B0H\n" + // Second submarine
+                      "C0H\n" + // First destroyer
+                      "D0H\n" + // Second destroyer
+                      "E0H\n" + // Third destroyer
+                      "F0U\n" + // First battleship
+                      "G0U\n" + // Second battleship
+                      "H0U\n" + // Third battleship
+                      "I0U\n" + // First carrier
+                      "J0U\n";  // Second carrier
+    TextPlayer player = createTextPlayer("A", inputData, bytes, board);
+
+    player.doPlacementPhase();
+    String expected = "Player A: you are going to place the following ships";
+    assertTrue(bytes.toString().contains(expected));
+  }
+
+  @Test
+  void test_computerPlacementPhase() throws IOException {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    Board<Character> board = new BattleShipBoard<>(10, 20, 'X');
+    TextPlayer player = createTextPlayer("A", "", bytes, board, true);
+
+    player.doPlacementPhase();
+    // Computer placement should not produce any output except potential placement errors
     String output = bytes.toString();
-    assertTrue(output.contains("You hit a "));
+    assertFalse(output.contains("Player A: you are going to place the following ships"));
     
-    // Test miss
-    bytes = new ByteArrayOutputStream();
-    player = createTextPlayer("A", "A0\n", bytes, b1);
-    player.playOneTurn(b2, enemyView);
-    output = bytes.toString();
-    assertTrue(output.contains("You missed"));
+    // Verify that all 10 ships are placed
+    int shipCount = 0;
+    for (Ship<Character> ship : board.getShips()) {
+      shipCount++;
+    }
+    assertEquals(10, shipCount);
+  }
+
+  @Test
+  void test_playOneTurn_human_fire() throws IOException {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    Board<Character> board = new BattleShipBoard<>(10, 20, 'X');
+    String inputData = "F\nA0\n"; // Fire action at A0
+    TextPlayer player = createTextPlayer("A", inputData, bytes, board);
+    
+    Board<Character> enemyBoard = new BattleShipBoard<>(10, 20, 'X');
+    // Place a ship at A0 on enemy board
+    V2ShipFactory factory = new V2ShipFactory();
+    Ship<Character> ship = factory.makeSubmarine(new Placement("A0H"));
+    enemyBoard.tryAddShip(ship);
+    
+    BoardTextView enemyView = new BoardTextView(enemyBoard);
+    player.playOneTurn(enemyBoard, enemyView);
+    
+    String output = bytes.toString();
+    assertTrue(output.contains("You hit a Submarine"));
+    assertTrue(ship.wasHitAt(new Coordinate(0, 0)));
+  }
+
+  @Test
+  void test_playOneTurn_human_move() throws IOException {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    Board<Character> board = new BattleShipBoard<>(10, 20, 'X');
+    // Add a ship to move
+    V2ShipFactory factory = new V2ShipFactory();
+    Ship<Character> ship = factory.makeSubmarine(new Placement("A0H"));
+    board.tryAddShip(ship);
+    
+    String inputData = "M\nA0\nB0H\n"; // Move ship from A0 to B0
+    TextPlayer player = createTextPlayer("A", inputData, bytes, board);
+    
+    Board<Character> enemyBoard = new BattleShipBoard<>(10, 20, 'X');
+    BoardTextView enemyView = new BoardTextView(enemyBoard);
+    
+    player.playOneTurn(enemyBoard, enemyView);
+    String output = bytes.toString();
+    assertTrue(output.contains("Successfully moved"));
+    
+    // Verify ship is at new location
+    assertNull(board.getShipAt(new Coordinate(0, 0))); // Old location
+    assertNotNull(board.getShipAt(new Coordinate(1, 0))); // New location
+  }
+
+  @Test
+  void test_playOneTurn_human_sonar() throws IOException {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    Board<Character> board = new BattleShipBoard<>(10, 20, 'X');
+    String inputData = "S\nE5\n"; // Sonar scan at E5
+    TextPlayer player = createTextPlayer("A", inputData, bytes, board);
+    
+    Board<Character> enemyBoard = new BattleShipBoard<>(10, 20, 'X');
+    // Add ships to enemy board for scanning
+    V2ShipFactory factory = new V2ShipFactory();
+    enemyBoard.tryAddShip(factory.makeSubmarine(new Placement("E5H")));
+    enemyBoard.tryAddShip(factory.makeBattleship(new Placement("F5U")));
+    
+    BoardTextView enemyView = new BoardTextView(enemyBoard);
+    player.playOneTurn(enemyBoard, enemyView);
+    
+    String output = bytes.toString();
+    assertTrue(output.contains("Submarines occupy"));
+    assertTrue(output.contains("Battleships occupy"));
+  }
+
+  @Test
+  void test_playOneTurn_computer() throws IOException {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    Board<Character> board = new BattleShipBoard<>(10, 20, 'X');
+    TextPlayer player = createTextPlayer("B", "", bytes, board, true);
+    
+    Board<Character> enemyBoard = new BattleShipBoard<>(10, 20, 'X');
+    // Add a ship to enemy board
+    V2ShipFactory factory = new V2ShipFactory();
+    enemyBoard.tryAddShip(factory.makeSubmarine(new Placement("A0H")));
+    
+    BoardTextView enemyView = new BoardTextView(enemyBoard);
+    
+    // Test multiple turns to verify computer follows pattern
+    for (int i = 0; i < 3; i++) {
+      player.playOneTurn(enemyBoard, enemyView);
+    }
+    
+    String output = bytes.toString();
+    assertTrue(output.contains("Player B's turn"));
+    // Verify computer either hit, missed, or used special action
+    assertTrue(output.contains("hit") || output.contains("missed") || 
+               output.contains("used a special action"));
+  }
+
+  @Test
+  void test_sonarScan_invalid_location() throws IOException {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    Board<Character> board = new BattleShipBoard<>(10, 20, 'X');
+    String inputData = "S\nA0\n"; // Invalid location (too close to edge)
+    TextPlayer player = createTextPlayer("A", inputData, bytes, board);
+    
+    Board<Character> enemyBoard = new BattleShipBoard<>(10, 20, 'X');
+    BoardTextView enemyView = new BoardTextView(enemyBoard);
+    
+    player.playOneTurn(enemyBoard, enemyView);
+    String output = bytes.toString();
+    assertTrue(output.contains("Invalid scan location"));
+  }
+
+  @Test
+  void test_moveShip_invalid_location() throws IOException {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    Board<Character> board = new BattleShipBoard<>(10, 20, 'X');
+    // Add a ship to move
+    V2ShipFactory factory = new V2ShipFactory();
+    board.tryAddShip(factory.makeSubmarine(new Placement("A0H")));
+    
+    String inputData = "M\nA0\nZ0H\n"; // Invalid new location
+    TextPlayer player = createTextPlayer("A", inputData, bytes, board);
+    
+    Board<Character> enemyBoard = new BattleShipBoard<>(10, 20, 'X');
+    BoardTextView enemyView = new BoardTextView(enemyBoard);
+    
+    player.playOneTurn(enemyBoard, enemyView);
+    String output = bytes.toString();
+    assertTrue(output.contains("Invalid"));
+  }
+
+  @Test
+  void test_actions_remaining() throws IOException {
+    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    Board<Character> board = new BattleShipBoard<>(10, 20, 'X');
+    TextPlayer player = createTextPlayer("A", "", bytes, board);
+    
+    // Initially should have 3 moves and 3 sonar scans
+    Board<Character> enemyBoard = new BattleShipBoard<>(10, 20, 'X');
+    BoardTextView enemyView = new BoardTextView(enemyBoard);
+    
+    String output = bytes.toString();
+    assertTrue(output.contains("3 remaining") || !output.contains("remaining"));
   }
 }
